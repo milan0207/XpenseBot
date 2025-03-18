@@ -1,37 +1,80 @@
-import { StyleSheet } from "react-native";
-
-import EditScreenInfo from "@/components/EditScreenInfo";
-import { Text, View } from "@/components/Themed";
+import { StyleSheet, Image, ScrollView, Text, View } from "react-native";
+import { Pie, PolarChart } from "victory-native";
+import images from "../../constants/images";
+import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
+import tailwindConfig from "../../tailwind.config";
+import Ionicons from "@expo/vector-icons/Ionicons";
 export default function TabOneScreen() {
+  function randomNumber() {
+    return Math.floor(Math.random() * 26) + 125;
+  }
+  function generateRandomColor(): string {
+    // Generating a random number between 0 and 0xFFFFFF
+    const randomColor = Math.floor(Math.random() * 0xffffff);
+    // Converting the number to a hexadecimal string and padding with zeros
+    return `#${randomColor.toString(16).padStart(6, "0")}`;
+  }
+  const DATA = (numberPoints = 5) =>
+    Array.from({ length: numberPoints }, (_, index) => ({
+      value: randomNumber(),
+      color: generateRandomColor(),
+      label: `Label ${index + 1}`,
+    }));
+  const colors = tailwindConfig?.theme?.extend?.colors as {
+    [key: string]: any;
+  };
+  const secondaryColor = colors?.secondary?.DEFAULT || "#000";
   return (
-    <View style={styles.container}>
-      <Text className="text-3xl text-white font-bold text-center">
-        Tab Onee
-      </Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <SafeAreaView className="h-full bg-primary">
+      <ScrollView>
+        <View className="w-full flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Image
+              source={images.logo}
+              resizeMode="contain"
+              className="w-[50px] h-[50px] mt-5 ml-5"
+            />
+            <Text className="text-xl text-secondary text-semibold font-iregular m1-2 mt-5">
+              XpenseBot
+            </Text>
+          </View>
+          <Ionicons
+            name="notifications-outline"
+            size={40}
+            color={secondaryColor}
+            className="mr-5 mt-5"
+          />
+        </View>
+        <View className="w-full flex-col items-left justify-center">
+          <Text className="text-2xl text-txtSecondary mt-10 ml-5 font-iregular">
+            Money available to spend:
+          </Text>
+          <Text className="text-6xl text-secondary mt-4 ml-5 font-iregular leading-none">
+            1500 RON
+          </Text>
+          <View className="w-full flex-row items-center">
+            <Text className="text-xl text-txtThird ml-5">Monthly income:</Text>
+            <Text className="text-xl text-greenAccent ml-3">2500 RON</Text>
+          </View>
+          <View className="w-full flex-row items-center mt-1">
+            <Text className="text-xl text-txtThird ml-5">
+              Spent this month:
+            </Text>
+            <Text className="text-xl text-redAccent ml-1 ">1000 RON</Text>
+          </View>
+        </View>
+        <View style={{ height: 250 }} className="mt-10 w-full mr-10">
+          <PolarChart
+            data={DATA()} // 👈 specify your data
+            labelKey={"label"} // 👈 specify data key for labels
+            valueKey={"value"} // 👈 specify data key for values
+            colorKey={"color"} // 👈 specify data key for color
+          >
+            <Pie.Chart />
+          </PolarChart>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-});

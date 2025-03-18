@@ -28,6 +28,32 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
+    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),
+    "Poppins-ExtraLight": require("../assets/fonts/Poppins-ExtraLight.ttf"),
+    "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
+    "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
+    "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
+    "Inter_18pt-Black": require("../assets/fonts/Inter/Inter_18pt-Black.ttf"),
+    "Inter_18pt-Bold": require("../assets/fonts/Inter/Inter_18pt-Bold.ttf"),
+    "Inter_18pt-BoldItalic": require("../assets/fonts/Inter/Inter_18pt-BoldItalic.ttf"),
+    "Inter_18pt-ExtraBold": require("../assets/fonts/Inter/Inter_18pt-ExtraBold.ttf"),
+    "Inter_18pt-ExtraBoldItalic": require("../assets/fonts/Inter/Inter_18pt-ExtraBoldItalic.ttf"),
+    "Inter_18pt-ExtraLight": require("../assets/fonts/Inter/Inter_18pt-ExtraLight.ttf"),
+    "Inter_18pt-ExtraLightItalic": require("../assets/fonts/Inter/Inter_18pt-ExtraLightItalic.ttf"),
+    "Inter_18pt-Italic": require("../assets/fonts/Inter/Inter_18pt-Italic.ttf"),
+    "Inter_18pt-Light": require("../assets/fonts/Inter/Inter_18pt-Light.ttf"),
+    "Inter_18pt-LightItalic": require("../assets/fonts/Inter/Inter_18pt-LightItalic.ttf"),
+    "Inter_18pt-Medium": require("../assets/fonts/Inter/Inter_18pt-Medium.ttf"),
+    "Inter_18pt-MediumItalic": require("../assets/fonts/Inter/Inter_18pt-MediumItalic.ttf"),
+    "Inter_18pt-Regular": require("../assets/fonts/Inter/Inter_18pt-Regular.ttf"),
+    "Inter_18pt-SemiBold": require("../assets/fonts/Inter/Inter_18pt-SemiBold.ttf"),
+    "Inter_18pt-SemiBoldItalic": require("../assets/fonts/Inter/Inter_18pt-SemiBoldItalic.ttf"),
+    "Inter_18pt-Thin": require("../assets/fonts/Inter/Inter_18pt-Thin.ttf"),
+    "Inter_18pt-ThinItalic": require("../assets/fonts/Inter/Inter_18pt-ThinItalic.ttf"),
+
     ...FontAwesome.font,
   });
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
