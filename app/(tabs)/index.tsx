@@ -1,10 +1,18 @@
-import { StyleSheet, Image, ScrollView, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  ScrollView,
+  Text,
+  View,
+  YellowBox,
+} from "react-native";
 import { Pie, PolarChart } from "victory-native";
 import images from "../../constants/images";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "../global.css";
 import tailwindConfig from "../../tailwind.config";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import DateFilter from "@/components/DateFilter";
 export default function TabOneScreen() {
   function randomNumber() {
     return Math.floor(Math.random() * 26) + 125;
@@ -47,7 +55,7 @@ export default function TabOneScreen() {
           />
         </View>
         <View className="w-full flex-col items-left justify-center">
-          <Text className="text-2xl text-txtSecondary mt-10 ml-5 font-iregular">
+          <Text className="text-2xl text-txtSecondary mt-5 ml-5 font-iregular">
             Money available to spend:
           </Text>
           <Text className="text-6xl text-secondary mt-4 ml-5 font-iregular leading-none">
@@ -73,6 +81,9 @@ export default function TabOneScreen() {
           >
             <Pie.Chart />
           </PolarChart>
+        </View>
+        <View className="mx-5 mt-10 ">
+          <DateFilter />
         </View>
       </ScrollView>
     </SafeAreaView>
