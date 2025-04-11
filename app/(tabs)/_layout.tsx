@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import { Tabs, router, usePathname } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../components/firebase/firebaseConfig";
+import { auth } from "../../firebase/firebaseConfig";
 import { Href, useRouter } from "expo-router";
 import { useSegments } from "expo-router";
 interface TabIconProps {

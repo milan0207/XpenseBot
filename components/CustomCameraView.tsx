@@ -2,10 +2,13 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useState, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { auth } from "../firebase/firebaseConfig";
+import { uploadImage } from "../lib/uploadImage";
+import { listenForResults } from "../lib/firestore";
 
 export default function CustomCameraView({
   onClose,
-  onPictureTaken,
+  onPictureTaken
 }: {
   onClose: () => void;
   onPictureTaken?: (uri: string) => void;
@@ -36,6 +39,24 @@ export default function CustomCameraView({
     );
   }
 
+  const handleImageCapture = async (photoUri: string) => {
+    const userId = auth.currentUser?.uid; // Get current user ID
+    if (!userId) return;
+
+    try {
+      //uploading image to Storage
+      const storagePath = await uploadImage(photoUri, userId);
+      // Listening for Firestore updates
+      const unsubscribe = listenForResults(userId, (text) => {
+        console.log("Extracted text:", text);
+        // Handle the extracted text as needed
+      });
+    } catch (error) {
+      // Handle error
+    }
+    onClose(); // Close the camera after capturing the image
+  };
+
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
@@ -52,9 +73,11 @@ export default function CustomCameraView({
           base64: true,
           skipProcessing: true,
         });
-        setCapturedImage(photo.uri);
-        if (onPictureTaken) {
-          onPictureTaken(photo.uri);
+        if (photo && photo.uri) {
+          setCapturedImage(photo.uri);
+          if (onPictureTaken) {
+            await onPictureTaken(photo.uri);
+          }
         }
       } catch (error) {
         console.error("Error taking picture:", error);
@@ -74,7 +97,7 @@ export default function CustomCameraView({
             <MaterialIcons name="cancel" size={30} color="white" />
             <Text style={styles.previewButtonText}>Retake</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.previewButton} onPress={onClose}>
+          <TouchableOpacity style={styles.previewButton} onPress={() => handleImageCapture(capturedImage)}>
             <MaterialIcons name="check-circle" size={30} color="white" />
             <Text style={styles.previewButtonText}>Use Photo</Text>
           </TouchableOpacity>
