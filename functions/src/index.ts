@@ -37,6 +37,8 @@ if (process.env.FUNCTIONS_EMULATOR === "true") {
 } else {
   client = new DocumentProcessorServiceClient({
     keyFilename: "../../firebase-service-account.json",
+    // Here are some problems with the path the firebase-service-account.json
+    // file has to be placed twice
   });
 }
 
@@ -99,6 +101,7 @@ export const processUploadedImage = functions.storage
         .move(`processed/${userId}/${path.basename(filePath)}`);
 
       console.log("Successfully processed:", filePath);
+      console.log("Extracted text:", extractedText);
       return null;
     } catch (error) {
       console.error("Error processing file:", filePath, error);

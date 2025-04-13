@@ -1,23 +1,35 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useState, useRef } from "react";
+import { useState, useRef,useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebase/firebaseConfig";
 import { uploadImage } from "../lib/uploadImage";
 import { listenForResults } from "../lib/firestore";
-
+import ResultListenerComponent from "../lib/firestore";
 export default function CustomCameraView({
   onClose,
-  onPictureTaken
+  onPictureTaken,
+  onTextExtracted,
+  onPictureSubmitted,
 }: {
   onClose: () => void;
   onPictureTaken?: (uri: string) => void;
+  onTextExtracted?: (text: string) => void;
+  onPictureSubmitted?: (storagePath: string) => void;
 }) {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const unsubscribeRef = useRef<() => void>();
+  useEffect(() => {
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current(); // Cleanup listener when component unmounts
+      }
+    };
+  }, []);
 
   if (!permission) {
     return <View style={styles.loadingContainer} />;
@@ -40,22 +52,55 @@ export default function CustomCameraView({
   }
 
   const handleImageCapture = async (photoUri: string) => {
-    const userId = auth.currentUser?.uid; // Get current user ID
+    const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     try {
-      //uploading image to Storage
+      // Upload image and get storage path
       const storagePath = await uploadImage(photoUri, userId);
-      // Listening for Firestore updates
-      const unsubscribe = listenForResults(userId, (text) => {
-        console.log("Extracted text:", text);
-        // Handle the extracted text as needed
-      });
+
+      // Pass storage path back to parent
+      if (onPictureSubmitted) {
+        await onPictureSubmitted(storagePath);
+      }
     } catch (error) {
-      // Handle error
+      console.error("Error handling image:", error);
     }
-    onClose(); // Close the camera after capturing the image
+    onClose();
   };
+
+  // const handleImageCapture = async (photoUri: string) => {
+  //   const userId = auth.currentUser?.uid; // Get current user ID
+  //   if (!userId) return;
+
+  //   try {
+  //     //uploading image to Storage
+  //     const storagePath = await uploadImage(photoUri, userId);
+  //     // Clean up previous listener if exists
+  //     // if (unsubscribeRef.current) {
+  //     //   unsubscribeRef.current();
+  //     //   console
+  //     // }
+  //     // Listening for Firestore updates
+  //     // unsubscribeRef.current = listenForResults(userId, (text) => {
+  //     //   console.log("Extracted text:", text);
+  //     //    if (onTextExtracted) {
+  //     //      onTextExtracted(text);
+  //     //    }
+  //     // });
+      
+  //     const unsubscribe = listenForResults(userId, (text) => {
+  //       console.log("Extracted text:", text);
+  //       if (onTextExtracted) {
+  //         onTextExtracted(text);
+  //       }
+  //     }
+      
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //   }
+  //   onClose(); // Close the camera after capturing the image
+  // };
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -97,7 +142,10 @@ export default function CustomCameraView({
             <MaterialIcons name="cancel" size={30} color="white" />
             <Text style={styles.previewButtonText}>Retake</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.previewButton} onPress={() => handleImageCapture(capturedImage)}>
+          <TouchableOpacity
+            style={styles.previewButton}
+            onPress={() => handleImageCapture(capturedImage)}
+          >
             <MaterialIcons name="check-circle" size={30} color="white" />
             <Text style={styles.previewButtonText}>Use Photo</Text>
           </TouchableOpacity>

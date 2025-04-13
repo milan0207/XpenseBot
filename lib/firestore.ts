@@ -9,7 +9,7 @@ export const listenForResults = (userId: string, callback: (text: string) => voi
     orderBy("processedAt", "desc"),
     limit(1)
   );
-  
+  console.log("running the ")
   return onSnapshot(q, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added") {
@@ -20,16 +20,16 @@ export const listenForResults = (userId: string, callback: (text: string) => voi
 };
 // Usage:
 export default function ResultListenerComponent() {
-  useEffect(() => {
-    const userId = auth.currentUser?.uid;
-    if (!userId) return;
+   useEffect(() => {
+     const userId = auth.currentUser?.uid;
+     if (!userId) return;
 
-    const unsubscribe = listenForResults(userId, (text) => {
-      console.log("Extracted text:", text);
-    });
+     const unsubscribe = listenForResults(userId, (text) => {
+       console.log("Extracted text:", text);
+     });
 
-    return () => unsubscribe();
-  }, []);
+     return () => unsubscribe();
+   }, []);
 
-  return null; // vagy UI, ha kell
-}
+   return null;
+ }
