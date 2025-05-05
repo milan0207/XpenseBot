@@ -6,6 +6,8 @@ import { auth } from "../firebase/firebaseConfig";
 import { uploadImage } from "../lib/uploadImage";
 import { listenForResults } from "../lib/firestore";
 import ResultListenerComponent from "../lib/firestore";
+import * as ImagePicker from "expo-image-picker";
+
 export default function CustomCameraView({
   onClose,
   onPictureTaken,
@@ -68,39 +70,29 @@ export default function CustomCameraView({
     }
     onClose();
   };
+  const handlePickFromGallery = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+  if (status !== 'granted') {
+    alert('A galéria eléréséhez engedélyre van szükség!');
+    return;
+  }
 
-  // const handleImageCapture = async (photoUri: string) => {
-  //   const userId = auth.currentUser?.uid; // Get current user ID
-  //   if (!userId) return;
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsEditing: true,
+    quality: 0.8,
+    base64: true,
+  });
 
-  //   try {
-  //     //uploading image to Storage
-  //     const storagePath = await uploadImage(photoUri, userId);
-  //     // Clean up previous listener if exists
-  //     // if (unsubscribeRef.current) {
-  //     //   unsubscribeRef.current();
-  //     //   console
-  //     // }
-  //     // Listening for Firestore updates
-  //     // unsubscribeRef.current = listenForResults(userId, (text) => {
-  //     //   console.log("Extracted text:", text);
-  //     //    if (onTextExtracted) {
-  //     //      onTextExtracted(text);
-  //     //    }
-  //     // });
-      
-  //     const unsubscribe = listenForResults(userId, (text) => {
-  //       console.log("Extracted text:", text);
-  //       if (onTextExtracted) {
-  //         onTextExtracted(text);
-  //       }
-  //     }
-      
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //   }
-  //   onClose(); // Close the camera after capturing the image
-  // };
+  if (!result.canceled && result.assets) {
+    const uri = result.assets[0].uri;
+    setCapturedImage(uri);
+    if (onPictureTaken) {
+      onPictureTaken(uri);
+    }
+  }
+}
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -187,6 +179,12 @@ export default function CustomCameraView({
           <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
             <View style={styles.captureButtonInner} />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.galleryButton}
+            onPress={handlePickFromGallery}
+          >
+            <MaterialIcons name="photo-library" size={30} color="white" />
+          </TouchableOpacity>
 
           <View style={styles.placeholder} />
         </View>
@@ -196,6 +194,11 @@ export default function CustomCameraView({
 }
 
 const styles = StyleSheet.create({
+  galleryButton: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 15,
+    borderRadius: 50,
+  },
   container: {
     flex: 1,
     backgroundColor: "black",
@@ -248,11 +251,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 40,
     left: 0,
-    right: 0,
+    right: -100,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     alignItems: "center",
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
   },
   flipButton: {
     backgroundColor: "rgba(0,0,0,0.5)",

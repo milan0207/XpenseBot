@@ -1,5 +1,5 @@
 import { firestore,auth } from "@/firebase/firebaseConfig";
-import { collection, query, where, onSnapshot,orderBy,limit } from "firebase/firestore";
+import { collection, query, where, onSnapshot,orderBy,limit,deleteDoc } from "firebase/firestore";
 import { useEffect } from "react";
 
 export const listenForResults = (userId: string, callback: (text: string) => void) => {
@@ -10,10 +10,13 @@ export const listenForResults = (userId: string, callback: (text: string) => voi
     limit(1)
   );
   console.log("running the ")
-  return onSnapshot(q, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
+  return onSnapshot(q,async (snapshot) => {
+    snapshot.docChanges().forEach(async (change) => {
       if (change.type === "added") {
-        callback(change.doc.data().extractedText);
+        callback(change.doc.data().parsedResponse as string);
+        //delete the document after processing
+        //We do not need it anymore
+        await deleteDoc(change.doc.ref);
       }
     });
   });

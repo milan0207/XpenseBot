@@ -6,7 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { View } from "react-native";
 import tailwindConfig from "../tailwind.config.js";
-const CustomButton = ({
+const CustomButtonWIcon = ({
   title,
   handlePress,
   containerStyles = "",
@@ -46,4 +46,4 @@ const CustomButton = ({
   );
 };
 
-export default CustomButton;
+export default CustomButtonWIcon;

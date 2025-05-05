@@ -39,10 +39,13 @@ yarn-error.*
 firebase/firebaseConfig.js
 
 # documentAi key
-functions/firebase-service-account.json
-functions/documentAiKey.json
+functions/keys/firebase-service-account.json
 
 # firebase project name
 *.firebaserc
 .firebaserc
 .firebaserc
+
+# gemini key
+functions/keys/geminiKey.txt
+
