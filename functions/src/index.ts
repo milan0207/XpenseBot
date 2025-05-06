@@ -35,7 +35,7 @@ initializeApp({
   credential: cert(serviceAccount),
   storageBucket: "xpensebot-f15ac.appspot.com",
 });
-if (process.env.FUNCTIONS_EMULATOR === "false") {// if true mock, if false live
+if (process.env.FUNCTIONS_EMULATOR === "true") {// if true mock, if false live
   console.log("Using mocked Document AI client (emulator mode)");
   client = mockDocumentAI as unknown as DocumentProcessorServiceClient;
   ai= mockGeminiAI;
@@ -92,12 +92,14 @@ export const processUploadedImage = functions.storage
       // Gemini parsing
       let parsedResponse = "";
       if (extractedText !== "No text found") {
-      const prompt = `Parse this Romanian receipt text meticulously. Follow these rules:
+        const prompt = `Parse this Romanian 
+      receipt text meticulously. Follow these rules:
 
       1. Correct any typos in product names
-      2. Extract quantities with units (e.g., 1KG, 500ML, 2 buc)
-      3. Use EXACTLY these categories:
-        - alcoholDrinks
+      2. Use EXACTLY these categories In the category field of the
+      3. find out what type of currency is used in the receipt and
+       use it in the currency field
+      JSON CHOSE ONE from here and label it based on the product name:
         - bakery
         - bathroom
         - beauty
@@ -117,19 +119,43 @@ export const processUploadedImage = functions.storage
        do not include these products:
 
       {
+        "id": 1,
         "store_name": "[Corrected store name]",
         "date": "YYYY-MM-DD",
         "total_amount": 123.45,
-        "items": {
-          "alcoholDrinks": ["example1-8.99-500ML", "example2-25.50-750ML"],
-          "bakery": ["example1-4.99-1KG"],
-          "bathroom": ["example1-5.99-1 buc"],
-          "dairy": ["example1-7.50-1L", "example2-12.30-200G"],
-          "vegetables_and_fruits": [example1-3.79-1KG", "example2-6.50-500G"],
-          "meat": ["example1-15.99-1KG"],
-          "snacks": ["example1-7.99-150G"],
-          "other": ["example1-12.00-2 buc"]
-        }
+        "currency": "currency1",
+        "items": [
+          {
+            "id": 1,
+            "name": "example1",
+            "category": "category1",
+            "price": 8.99,
+          },
+          {
+            "id": 2,
+            "name": "example2",
+            "category": "category1",
+            "price": 25.50,
+          },
+          {
+            "id": 3,
+            "name": "example1",
+            "category": "category1",
+            "price": 4.99,
+          },
+          {
+            "id": 4,
+            "name": "example1",
+            "category": "category1",
+            "price": 5.99,
+          },
+          {
+            "id": 5,
+            "name": "example1",
+            "category": "category1",
+            "price": 7.50,
+          }
+      ]
       }
       the example has now ended, from here on you should parse the text:
       Receipt text:
@@ -137,8 +163,6 @@ export const processUploadedImage = functions.storage
 
       Important:
       - Prices MUST have 2 decimal places
-      - Quantity format: [number][unit] (e.g., 1KG, 500ML, 2 buc)
-      - If quantity missing, use "1 buc"
       - Never invent prices or products!`;
         const response = await ai.models.generateContent({
           model: "gemini-2.0-flash",

@@ -4,7 +4,7 @@ import { View } from "react-native";
 import tailwindConfig from "../tailwind.config.js";
 import CategoryIcons from "./CategoryIcons";
 
-const ItemBox = ({ name, category, quantity, price, handlePress }) => {
+const ItemBox = ({ item, handlePress }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -13,26 +13,32 @@ const ItemBox = ({ name, category, quantity, price, handlePress }) => {
     >
       <View className="flex-row items-center justify-center w-full">
         <CategoryIcons
-          name={category}
-          className="w-12 h-12 ml-5" // NativeWind classes
+          name={item.category}
+          className="w-12 h-12 ml-5"
         />
         <View className="flex-1 ml-5 flex-col justify-center">
           <View className="flex-row">
-          <Text className="text-txtSecondary font-semibold text-lg">Name: </Text>
-          <Text className="text-txtPrimary font-semibold text-lg">{name}</Text>
+            <Text className="text-txtSecondary font-semibold text-lg">
+              Name:{" "}
+            </Text>
+            <Text className="text-txtPrimary font-semibold text-lg">
+              {item.name}
+            </Text>
           </View>
           <View className="flex-row">
-          <Text className="text-txtSecondary font-semibold text-sm">Category: </Text>
-          <Text className="text-txtPrimary font-semibold text-sm">{category}</Text>
-          </View>
-          <View className="flex-row">
-          <Text className="text-txtSecondary font-semibold text-sm">Quantity: </Text>
-          <Text className="text-txtPrimary font-semibold text-sm">{quantity}</Text>
+            <Text className="text-txtSecondary font-semibold text-sm">
+              Category:{" "}
+            </Text>
+            <Text className="text-txtPrimary font-semibold text-sm">
+              {item.category}
+            </Text>
           </View>
         </View>
         <View className="flex-col mx-5 justify-center items-center">
-        <Text className="text-txtPrimary font-semibold text-2xl mr-2">{price}</Text>
-        <Text className="text-txtPrimary font-semibold text-sm">RON</Text>
+          <Text className="text-txtPrimary font-semibold text-2xl mr-2">
+            {item.price}
+          </Text>
+          <Text className="text-txtPrimary font-semibold text-sm">RON</Text>
         </View>
       </View>
     </TouchableOpacity>

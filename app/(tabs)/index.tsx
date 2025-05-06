@@ -74,10 +74,10 @@ export default function TabOneScreen() {
         </View>
         <View style={{ height: 250 }} className="mt-10 w-full mr-10">
           <PolarChart
-            data={DATA()} // 👈 specify your data
-            labelKey={"label"} // 👈 specify data key for labels
-            valueKey={"value"} // 👈 specify data key for values
-            colorKey={"color"} // 👈 specify data key for color
+            data={DATA()} 
+            labelKey={"label"} 
+            valueKey={"value"} 
+            colorKey={"color"}
           >
             <Pie.Chart />
           </PolarChart>

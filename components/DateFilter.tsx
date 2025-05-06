@@ -1,13 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Touchable, TouchableOpacity, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-const DateFilter = () => {
-  const [selectedFilter, setSelectedFilter] = useState("Today");
+interface DateFilterProps {
+  onSelect: (selectedDate: string) => void;
+}
+
+export default function DateFilter({ onSelect }: DateFilterProps) {
+  const [selectedFilter, setSelectedFilter] = useState("Week");
   const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const filters = ["Today", "Week", "Month", "6 Months"];
+
+  const onDateChange = (event: any, selectedDate: Date | undefined) => {
+    setShowPicker(Platform.OS === "ios");
+    if (selectedDate) {
+      //YYYY-MM-DD format
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      onSelect(formattedDate);
+    }
+  };
 
   return (
     <View className="flex-row">
@@ -15,7 +28,10 @@ const DateFilter = () => {
         {filters.map((filter) => (
           <Pressable
             key={filter}
-            onPress={() => setSelectedFilter(filter)}
+            onPress={() => {
+              setSelectedFilter(filter);
+              onSelect(filter);
+            }}
             className={`px-3 py-2 rounded-2xl mr-2 ${
               selectedFilter === filter ? "bg-secondary" : "bg-transparent"
             }`}
@@ -24,14 +40,20 @@ const DateFilter = () => {
           </Pressable>
         ))}
       </View>
-      <Pressable
+      <TouchableOpacity
         onPress={() => setShowPicker(true)}
         className="px-3 py-2 rounded-2xl bg-secondary ml-2"
       >
         <Text className="text-white font-iregular text-sm">Select date</Text>
-      </Pressable>
+      </TouchableOpacity>
+      {showPicker && (
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
     </View>
   );
 };
-
-export default DateFilter;

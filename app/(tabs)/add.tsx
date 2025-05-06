@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text,ScrollView } from "react-native";
+import { StyleSheet, View, Text,ScrollView,Modal } from "react-native";
 import { useState,useEffect } from "react";
 import CustomButtonWIcon from "@/components/CustomButtonWIcon";
 import CameraView from "@/components/CustomCameraView";
@@ -8,23 +8,26 @@ import { auth } from "@/firebase/firebaseConfig";
 import { listenForResults } from "@/lib/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ItemBox from "@/components/ItemBox";
+import receiptModel from "@/models/ReceiptModel"
+import itemModel from "@/models/ItemModel";
+import EditItemScreen from "@/components/EditItemScreen"; // adjust path as needed
+import saveReceipt from "@/lib/database";
+
 
 export default function AddScreen() {
   const [showCamera, setShowCamera] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [storeName, setStoreName] = useState("");
   const [totalAmount, setTotalAmount] = useState("");
-  const [products, setProducts] = useState<{
-    category: string;
-    name: string;
-    quantity: string;
-    price: string;
-  }[]>([]);
+  const [products, setProducts] = useState<itemModel[]>([]);
   const [date, setDate] = useState("");
   const userId = auth.currentUser?.uid;
   const [unsubscribe, setUnsubscribe] = useState<() => void>();
   const [isProcessing, setIsProcessing] = useState(false);
-
+  const [selectedItem, setSelectedItem] = useState<itemModel | null>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currency, setCurrency] = useState("");
 
   useEffect(() => {
     return () => {
@@ -35,13 +38,44 @@ export default function AddScreen() {
   }, [unsubscribe]);
 
   const handleSave = () => {
-    console.log("Save pressed");
+    const receipt = new receiptModel(
+      0, 
+      storeName,
+      date,
+      parseFloat(totalAmount),
+      currency,
+      products
+    );
+    if (!userId) return;
+    setIsProcessing(true);
+    saveReceipt(receipt, userId)
+      .then((receiptId) => {
+        console.log("Receipt saved with ID:", receiptId);
+        setIsProcessing(false);
+        setStoreName("");
+        setTotalAmount("");
+        setProducts([]);
+        setSelectedDate(null);
+      })
+      .catch((error) => {
+        console.error("Error saving receipt:", error);
+        setIsProcessing(false);
+      });
   };
   const handleScan = () => {
     console.log("Scan pressed");
     setShowCamera(true);
 
   };
+
+  const itemPressed = (item: itemModel) => {
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
+  const closeModal = () => {
+      setModalVisible(false);
+      setSelectedItem(null);
+    };
 
    const handlePictureSubmitted = (storagePath: string) => {
      if (!userId) return;
@@ -50,6 +84,7 @@ export default function AddScreen() {
       setStoreName("");
       setTotalAmount("");
       setProducts([]);
+      setCurrency("");
       
      // Clear previous listener
      if (unsubscribe) {
@@ -70,49 +105,39 @@ export default function AddScreen() {
       
    };
 
+
+
+
   const handleTextExtracted = (text: string) => {
   try {
     // Parse the JSON response from Gemini
     console.log("Received text:", text);
-    const parsedData = JSON.parse(text);
-    
-    // Extract store information
-    setStoreName(parsedData.store_name || "Unknown Store");
-    
-    // Format and set total amount
-    setTotalAmount(parsedData.total_amount ? `RON ${parsedData.total_amount}` : "N/A");
+    const receiptData = JSON.parse(text);
 
-    // Set transaction date
-    setDate(parsedData.date || new Date().toISOString().split('T')[0]);
-
-    // Process and flatten items
-    const allProducts = Object.entries(parsedData.items).flatMap(
-      ([category, items]) => {
-        return (items as string[]).map((item) => {
-          // Split into three parts: name-quantity-price
-          const [name, priceStr, quantityStr] = item.split("-");
-
-          // Clean up quantity format (remove .000 decimals and extra spaces)
-          const formattedQuantity = quantityStr
-            .replace(/\.000/g, "") // Remove .000 decimals
-            .replace(/\s+/g, " ") // Normalize whitespace
-            .trim();
-
-          return {
-            category,
-            name: name.trim(),
-            quantity: formattedQuantity || "1 buc", // Fallback to 1 buc
-            price: priceStr ? priceStr.trim() : "0.00", // Fallback to 0.00 if price is missing
-          };
-        });
-      }
+    // Create receipt instance
+    const receipt = new receiptModel(
+      receiptData.id,
+      receiptData.store_name,
+      receiptData.date,
+      receiptData.total_amount,
+      receiptData.currency,
+      receiptData.items.map(
+        (item: { id: number; name: string; category: string; price: number; }) =>
+          new itemModel(
+            item.id,
+            item.name,
+            item.category,
+            item.price,
+          )
+      )
     );
 
     // Update products state
-    setProducts(allProducts);
-    
-    // If you need to keep the raw items structure
-    // setProductCategories(parsedData.items);
+    setProducts(receipt.items);
+    setStoreName(receipt.store_name);
+    setTotalAmount(receipt.total_amount.toString());
+    setDate(receipt.date);
+    setSelectedDate(new Date(receipt.date));
 
   } catch (error) {
     console.error("Error parsing receipt data:", error);
@@ -151,7 +176,7 @@ export default function AddScreen() {
               />
               <FormField
                 title="Total amount:"
-                value={totalAmount}
+                value={totalAmount + " " + currency}
                 handleChangeText={(text: string) => setTotalAmount(text)}
                 otherStyles="mt-3 mx-5"
                 placeholder={undefined}
@@ -162,17 +187,71 @@ export default function AddScreen() {
               The purchased items:
             </Text>
             <View>
-              {products.map((product, index) => (
+              <CustomButtonWIcon
+                title="Add item"
+                handlePress={() => {
+                  setSelectedItem(itemModel.emptyItem());
+                  setModalVisible(true);
+                  setIsEditing(false);
+                }}
+                containerStyles="w-2/4 mx-2 ml-7"
+                iconName={"add-circle-outline"}
+              />
+            </View>
+
+            <View>
+              {products.map((product: itemModel) => (
                 <ItemBox
-                  key={`${product.name}-${index}`}
-                  name={product.name}
-                  category={product.category}
-                  quantity={product.quantity}
-                  price={`${product.price} RON`}
-                  handlePress={undefined}
+                  key={product.id}
+                  item={product}
+                  handlePress={() => itemPressed(product)}
                 />
               ))}
             </View>
+
+            <Modal
+              visible={isModalVisible}
+              animationType="slide"
+              transparent
+              onRequestClose={closeModal}
+            >
+              <View className="flex-1 bg-black/80 justify-center items-center px-6">
+                <View className="w-full rounded-3xl bg-primary p-4 max-h-[90%]">
+                  {selectedItem && (
+                    <EditItemScreen
+                      item={selectedItem}
+                      onClose={() => {
+                        setSelectedItem(null);
+                        setModalVisible(false);
+                        setIsEditing(false);
+                      }}
+                      onSave={(updatedItem) => {
+                        if (isEditing) {
+                          // Update existing item
+                          setProducts((prev) =>
+                            prev.map((p) =>
+                              p.id === updatedItem.id ? updatedItem : p
+                            )
+                          );
+                        } else {
+                          // Add new item (with proper ID generation)
+                          setProducts((prev) => [
+                            ...prev,
+                            {
+                              ...updatedItem,
+                              id: Date.now(), // Temporary ID for local state
+                            },
+                          ]);
+                        }
+                        setSelectedItem(null);
+                        setIsEditing(false);
+                        setModalVisible(false);
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
+            </Modal>
 
             <View className="flex flex-row items-center justify-between">
               <View className="flex w-1/2 flex-row items-center justify-start">
@@ -180,7 +259,7 @@ export default function AddScreen() {
                   title="Save"
                   handlePress={handleSave}
                   containerStyles="my-7 w-3/4 mx-2 ml-7"
-                  isLoading={false}
+                  isLoading={isProcessing}
                   iconName={"save"}
                 />
               </View>
@@ -200,5 +279,3 @@ export default function AddScreen() {
     </SafeAreaView>
   );
 }
-
-//known bugs, itembox not working, MockGemini is working but real gemini is not.

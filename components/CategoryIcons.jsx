@@ -2,8 +2,7 @@ import React from "react";
 import { View, Image } from "react-native";
 import categoryIcons from "../assets/images/categoryIcons"; // Új import
 
-const CategoryIcons = ({ name, className = "w-6 h-6", style, ...props }) => {
-  // Dinamikus ikon választás
+const CategoryIcons = ({ name, className = "w-6 h-6", ...props }) => {
   const iconKey = name.toLowerCase().replace(/ /g, "_");
   const source = categoryIcons[iconKey];
 
@@ -13,7 +12,7 @@ const CategoryIcons = ({ name, className = "w-6 h-6", style, ...props }) => {
   }
 
   return (
-    <View className={className} style={style}>
+    <View className={className}>
       <Image
         source={source}
         className="w-full h-full"

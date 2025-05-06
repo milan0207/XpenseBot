@@ -30,13 +30,15 @@ const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, value, onChang
         {label}
       </Text>
       <Pressable onPress={showDatepicker}>
-        <Text
+        <View
           className={`w-full h-16 px-4 rounded-2xl border-2 flex flex-row items-center ${
             isFocused ? "border-secondary" : "border-black-200"
           } bg-black-100`}
         >
-          {value ? value.toLocaleDateString() : ""}
-        </Text>
+          <Text className="flex-1 text-white font-psemibold text-base">
+            {value ? value.toLocaleDateString() : ""}
+          </Text>
+        </View>
       </Pressable>
       {showPicker && (
         <DateTimePicker
