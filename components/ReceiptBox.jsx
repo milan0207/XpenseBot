@@ -4,45 +4,39 @@ import { View } from "react-native";
 import tailwindConfig from "../tailwind.config.js";
 import CategoryIcons from "./CategoryIcons";
 
-const ItemBox = ({ item, handlePress }) => {
+const ItemBox = ({ receipt, handlePress }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      className="bg-blackContrast rounded-full min-h-[53px] justify-center items-center mx-6 my-2"
+      className="bg-blackContrast rounded-full min-h-[60px] justify-center items-center mx-6 my-2"
     >
       <View className="flex-row items-center justify-center w-full">
-        <CategoryIcons
-          name={item.category}
-          className="w-12 h-12 ml-5"
-        />
         <View className="flex-1 ml-5 flex-col justify-center">
           <View className="flex-row">
             <Text className="text-txtSecondary font-semibold text-lg">
-              Name:{" "}
+              Store Name:{" "}
             </Text>
-            <Text
-              className={`text-txtPrimary font-semibold ${
-                item.name.length > 18 ? "text-sm mt-1.5" : "text-lg"
-              }`}
-            >
-              {item.name}
+            <Text className="text-txtPrimary font-semibold text-lg">
+              {receipt.store_name}
             </Text>
           </View>
           <View className="flex-row">
             <Text className="text-txtSecondary font-semibold text-sm">
-              Category:{" "}
+              Date: {" "}
             </Text>
             <Text className="text-txtPrimary font-semibold text-sm">
-              {item.category}
+              {receipt.date.toISOString().split("T")[0]}
             </Text>
           </View>
         </View>
         <View className="flex-col mx-5 justify-center items-center">
           <Text className="text-txtPrimary font-semibold text-2xl mr-2">
-            {item.price}
+            {receipt.total_amount}
           </Text>
-          <Text className="text-txtPrimary font-semibold text-sm">RON</Text>
+          <Text className="text-txtPrimary font-semibold text-sm">
+            {receipt.currency}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -83,7 +83,7 @@ export default function TabOneScreen() {
           </PolarChart>
         </View>
         <View className="mx-5 mt-10 ">
-          <DateFilter />
+          {/* <DateFilter /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -12,4 +12,4 @@ class ItemModel{
     }
 }
 
-export default ItemModel;
+export default ItemModel;   

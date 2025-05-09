@@ -35,7 +35,7 @@ initializeApp({
   credential: cert(serviceAccount),
   storageBucket: "xpensebot-f15ac.appspot.com",
 });
-if (process.env.FUNCTIONS_EMULATOR === "true") {// if true mock, if false live
+if (process.env.FUNCTIONS_EMULATOR === "false") {// if true mock, if false live
   console.log("Using mocked Document AI client (emulator mode)");
   client = mockDocumentAI as unknown as DocumentProcessorServiceClient;
   ai= mockGeminiAI;
