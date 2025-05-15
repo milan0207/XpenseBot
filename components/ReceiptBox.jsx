@@ -4,12 +4,12 @@ import { View } from "react-native";
 import tailwindConfig from "../tailwind.config.js";
 import CategoryIcons from "./CategoryIcons";
 
-const ItemBox = ({ receipt, handlePress }) => {
+const ItemBox = ({ receipt, handlePress,isShared }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      className="bg-blackContrast rounded-full min-h-[60px] justify-center items-center mx-6 my-2"
+      className={`${isShared ? 'bg-secondary/30' : 'bg-blackContrast/50'} rounded-full min-h-[60px] justify-center items-center mx-6 my-2`}
     >
       <View className="flex-row items-center justify-center w-full">
         <View className="flex-1 ml-5 flex-col justify-center">
@@ -17,7 +17,7 @@ const ItemBox = ({ receipt, handlePress }) => {
             <Text className="text-txtSecondary font-semibold text-lg">
               Store Name:{" "}
             </Text>
-            <Text className="text-txtPrimary font-semibold text-lg">
+            <Text className="text-txtPrimary font-semibold text-sm mt-1.5">
               {receipt.store_name}
             </Text>
           </View>

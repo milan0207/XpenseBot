@@ -13,9 +13,10 @@
 
 import * as functions from "firebase-functions/v1";
 // eslint-disable-next-line max-len
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { initializeApp, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 import * as path from "path";
 import * as os from "os";
@@ -28,17 +29,20 @@ let client: DocumentProcessorServiceClient;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const serviceAccount = require("../keys/firebase-service-account.json");
 // eslint-disable-next-line max-len
-const key = fs.readFileSync(path.resolve(__dirname, "../keys/geminiKey.txt"), "utf-8").trim();
+const key = fs
+  .readFileSync(path.resolve(__dirname, "../keys/geminiKey.txt"), "utf-8")
+  .trim();
 let ai: any;
 
 initializeApp({
   credential: cert(serviceAccount),
   storageBucket: "xpensebot-f15ac.appspot.com",
 });
-if (process.env.FUNCTIONS_EMULATOR === "false") {// if true mock, if false live
+if (process.env.FUNCTIONS_EMULATOR === "false") {
+  // if true mock, if false live
   console.log("Using mocked Document AI client (emulator mode)");
   client = mockDocumentAI as unknown as DocumentProcessorServiceClient;
-  ai= mockGeminiAI;
+  ai = mockGeminiAI;
 } else {
   client = new DocumentProcessorServiceClient({
     keyFilename: "./keys/firebase-service-account.json",
@@ -207,3 +211,37 @@ export const processUploadedImage = functions.storage
       }
     }
   });
+
+export const findUserByEmail = functions.https.onCall(
+  async (data, context) => {
+    // Hitelesítés ellenőrzése
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "Hitelesítés szükséges"
+      );
+    }
+
+    const email = data.email?.toLowerCase().trim();
+    if (!email) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Érvénytelen email cím"
+      );
+    }
+    try {
+      const user = await getAuth().getUserByEmail(email);
+      console.log("User found:", user);
+      return {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "",
+      };
+    } catch (error) {
+      throw new functions.https.HttpsError(
+        "not-found",
+        "Nem található felhasználó"
+      );
+    }
+  }
+);

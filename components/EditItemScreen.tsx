@@ -84,7 +84,6 @@ export default function EditItemScreen({
         className="bg-blackContrast text-white p-3 rounded-xl mb-6"
       />
 
-      {/* Buttons */}
       <View className="flex-row justify-between space-x-4">
         <View className="flex-1">
           <CustomButton

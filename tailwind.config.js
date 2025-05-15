@@ -10,6 +10,7 @@ module.exports = {
           DEFAULT: "#DAA520",
           100: "#FF9001",
           200: "#FF8E01",
+          light: "#DAA000",
           lightblack: "#262626",
         },
         blackContrast: "#3C3C43",

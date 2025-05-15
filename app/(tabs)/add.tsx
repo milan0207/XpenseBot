@@ -31,6 +31,7 @@ export default function AddScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [currency, setCurrency] = useState("");
   const [receiptID, setReceiptID] = useState("");
+  const [message, setMessage] = useState("");
 
   const params = useLocalSearchParams();
   let receipt: receiptModel | null = null;
@@ -90,8 +91,17 @@ export default function AddScreen() {
       setSelectedDate(null);
     } catch (error) {
       console.error("Error saving receipt:", error);
+      setMessage("Error: saving receipt. Please try again.");
     } finally {
+
       setIsProcessing(false);
+      if(storeName === "" && totalAmount === 0) {
+        setMessage("Receipt deleted successfully!");
+      }
+      else
+      {
+        setMessage("Receipt saved successfully!");
+      }
       receipt = null;
     }
   };
@@ -210,7 +220,7 @@ export default function AddScreen() {
               />
               <FormField
                 title="Total amount:"
-                value={totalAmount + " " + currency}
+                value={totalAmount.toString()}
                 handleChangeText={(text: number) => setTotalAmount(text)}
                 otherStyles="mt-3 mx-5"
                 placeholder={undefined}
@@ -241,12 +251,11 @@ export default function AddScreen() {
                   setDate("");
                   setCurrency("");
                   (params.receipt as any) = null;
-                  receipt = null; 
+                  receipt = null;
                 }}
                 iconName={"clear"}
                 containerStyles="w-2/4 ml-1"
               />
-
             </View>
 
             <View>
@@ -291,7 +300,10 @@ export default function AddScreen() {
                             ...prev,
                             {
                               ...updatedItem,
-                              id: typeof updatedItem.id === "number" ? updatedItem.id : parseInt(uuidv4(), 10), // Ensure id is a number
+                              id:
+                                typeof updatedItem.id === "number"
+                                  ? updatedItem.id
+                                  : parseInt(uuidv4(), 10), // Ensure id is a number
                             },
                           ]);
                         }
@@ -304,13 +316,23 @@ export default function AddScreen() {
                 </View>
               </View>
             </Modal>
-
+            {message && (
+              <Text
+                className={`text-lg font-pmedium mx-7 my-3 ${
+                  message.startsWith("Error")
+                    ? "text-redAccent"
+                    : "text-greenAccent"
+                }`}
+              >
+                {message}
+              </Text>
+            )}
             <View className="flex flex-row items-center justify-between">
               <View className="flex w-1/2 flex-row items-center justify-start">
                 <CustomButtonWIcon
                   title="Save"
                   handlePress={handleSave}
-                  containerStyles="my-7 w-3/4 mx-2 ml-7"
+                  containerStyles="my-1 w-3/4 mx-2 ml-7"
                   isLoading={isProcessing}
                   iconName={"save"}
                 />

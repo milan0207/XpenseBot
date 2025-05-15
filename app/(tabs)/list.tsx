@@ -9,11 +9,11 @@ import DateFilter from "@/components/DateFilter";
 import ReceitpModel from "@/models/ReceiptModel";
 import ItemModel from "@/models/ItemModel";
 import ReceiptBox from "@/components/ReceiptBox";
-import { getItems, getReceipts } from "@/lib/firestore";
+import { getItems, getReceipts, getSharedReceipts } from "@/lib/firestore";
 import { auth } from "@/firebase/firebaseConfig";
 import { router } from "expo-router";
 import ReceiptModel from "@/models/ReceiptModel";
-import { set } from "firebase/database";
+import { get, set } from "firebase/database";
 import ItemBox from "@/components/ItemBox";
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -26,6 +26,7 @@ export default function Expenses() {
   const [selectedToDate, setSelectedToDate] = useState<Date | Date>(new Date());
   const [receipts, setReceipts] = useState<ReceitpModel[]>([]);
   const [items, setItems] = useState<ItemModel[]>([]);
+  const [sharedReceipts, setSharedReceipts] = useState<ReceitpModel[]>([]);
 
   useEffect(() => {
     if (userId) {
@@ -37,6 +38,14 @@ export default function Expenses() {
           (fetchedReceipts: ReceitpModel[]) => {
             setItems([]);
             setReceipts(fetchedReceipts);
+          }
+        );
+        getSharedReceipts(
+          userId,
+          selectedFromDate,
+          selectedToDate,
+          (fetchedSharedReceipts: ReceitpModel[]) => {
+            setSharedReceipts(fetchedSharedReceipts);
           }
         );
       } else if (selectedItemType === "Items") {
@@ -121,7 +130,7 @@ export default function Expenses() {
                   <AntDesign
                     name="closecircle"
                     size={24}
-                    color="grey" 
+                    color="grey"
                     className="my-5 mx-5"
                   />
                 </TouchableOpacity>
@@ -143,6 +152,7 @@ export default function Expenses() {
               <ReceiptBox
                 key={receipt.id}
                 receipt={receipt}
+                isShared={false}
                 handlePress={() => {
                   const serializedReceipt = {
                     ...receipt,
@@ -161,6 +171,16 @@ export default function Expenses() {
                 item={item}
                 handlePress={() => {
                   console.log("Item pressed:", item);
+                }}
+              />
+            ))}
+            {sharedReceipts.map((receipt: ReceiptModel) => (
+              <ReceiptBox
+                key={receipt.id}
+                receipt={receipt}
+                isShared={true}
+                handlePress={() => {
+                  console.log("Shared receipt pressed:", receipt);
                 }}
               />
             ))}

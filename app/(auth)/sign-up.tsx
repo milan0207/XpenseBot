@@ -12,11 +12,11 @@ import {
 } from "firebase/auth";
 import images from "../../constants/images";
 
-const validateEmail = (email) => {
+const validateEmail = (email: string) => {
   return /\S+@\S+\.\S+/.test(email);
 };
 
-const validatePassword = (password) => {
+const validatePassword = (password: string | any[]) => {
   const errors = [];
 
   if (password.length < 8) errors.push("At least 8 characters");
@@ -147,7 +147,7 @@ const SignUp = () => {
           <CustomButton
             title="Sign-up"
             handlePress={submit}
-            containerStyles="mt-7"
+            containerStyles="mt-7 bg-secondary"
             isLoading={isSubmitting}
           />
 
