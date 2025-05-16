@@ -5,13 +5,13 @@ import CameraView from "@/components/CustomCameraView";
 import FormField from "@/components/FormField";
 import DatePickerField from "@/components/DatePickerField";
 import { auth } from "@/firebase/firebaseConfig";
-import { listenForResults } from "@/lib/firestore";
+import { listenForResults } from "@/lib/receiptDb";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ItemBox from "@/components/ItemBox";
 import receiptModel from "@/models/ReceiptModel"
 import itemModel from "@/models/ItemModel";
 import EditItemScreen from "@/components/EditItemScreen"; // adjust path as needed
-import { saveReceipt } from "@/lib/firestore";
+import { saveReceipt } from "@/lib/receiptDb";
 import { useLocalSearchParams } from "expo-router";
 import { v4 as uuidv4 } from "uuid";
 

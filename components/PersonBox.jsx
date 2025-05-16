@@ -2,7 +2,7 @@
 import { Text, TouchableOpacity } from "react-native";
 import { View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { acceptFriendRequest,rejectFriendRequest } from "@/lib/firestore";
+import { acceptFriendRequest,rejectFriendRequest } from "@/lib/receiptDb";
 import { auth } from "@/firebase/firebaseConfig";
 export const PersonBox = ({email,requestId,onActionComplete}) => {
 

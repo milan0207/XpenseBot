@@ -8,7 +8,8 @@ import { useEffect,useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import CustomButtonWIcon from "@/components/CustomButtonWIcon";
 import { PersonBox } from "@/components/PersonBox";
-import { sendFriendRequestByEmail,getFriendRequests,getFriends } from "@/lib/firestore";
+import { sendFriendRequestByEmail,getFriendRequests,getFriends } from "@/lib/friendRequests";
+import { set } from "firebase/database";
 
 type Friend = {
   friendEmail: string;
@@ -70,22 +71,30 @@ export default function Requests() {
 
     const handleSendRequest = async () => {
       setRequestIsLoading(true);
-        setFormError("");
-        setFeedback("");
+      setFormError("");
+      setFeedback("");
+
       try {
-        // Simulate sending a friend request
         if (auth.currentUser?.uid) {
-          sendFriendRequestByEmail(auth.currentUser.uid, email);
+          await sendFriendRequestByEmail(auth.currentUser.uid, email);
           console.log("Friend request sent to:", email);
+          setFeedback("Friend request sent successfully!!!!");
         } else {
           console.error("User ID is undefined. Cannot send friend request.");
+          setFeedback("User not logged in.");
         }
-        
       } catch (error) {
-        console.error("Error sending friend request:", error);
+        console.log("Error sending friend request::::", error);
+        setFeedback(
+          "Error: " +
+            (typeof error === "string"
+              ? error
+              : error instanceof Error
+              ? error.message
+              : "An unknown error occurred.")
+        );
       } finally {
         setRequestIsLoading(false);
-        setFeedback("Friend request sent successfully!");
       }
     };
   return (
@@ -104,7 +113,15 @@ export default function Requests() {
               keyboardType="email-address"
             ></FormField>
             <Text className="text-greenAccent text-sm font-semibold mx-7 mt-1">
-              {feedback}
+                <Text
+                className={`text-sm font-semibold mx-7 mt-1 ${
+                  feedback.startsWith("Error: ")
+                  ? "text-redAccent"
+                  : "text-greenAccent"
+                }`}
+                >
+                {feedback}
+                </Text>
             </Text>
             <CustomButtonWIcon
               title="Send request"

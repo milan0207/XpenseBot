@@ -1,4 +1,4 @@
-import { StyleSheet, Image, ScrollView, Text, View,TouchableOpacity } from "react-native";
+import { StyleSheet, Image, ScrollView, Text, View,TouchableOpacity,Platform } from "react-native";
 import { useEffect, useState } from "react";
 import ItemModel from "@/models/ItemModel";
 import images from "../../constants/images";
@@ -7,12 +7,25 @@ import { auth } from "@/firebase/firebaseConfig";
 import "../global.css";
 import tailwindConfig from "../../tailwind.config";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { getItems } from "@/lib/firestore";
+import { getItems} from "@/lib/receiptDb";
 import RNEChartsPro from "react-native-echarts-pro";
-import { getMonthlyBudget } from "@/lib/firestore";
+import { getMonthlyBudget } from "@/lib/receiptDb";
 import { router } from "expo-router";
 import {firestore} from "@/firebase/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { registerForPushNotificationsAsync } from "@/lib/registerForPushNotificationsAsync";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function TabOneScreen() {
   const userId = auth.currentUser?.uid;
@@ -25,10 +38,45 @@ export default function TabOneScreen() {
     Record<string, { total: number; category: string }>
     | null
   >(null);
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState<
+    Notifications.Notification | undefined
+  >(undefined);
   //start of the month
-  const selectedFromDate = new Date(2023, 9, 1);
+  const selectedFromDate =new Date();
+  selectedFromDate.setDate(1);
+  selectedFromDate.setHours(0, 0, 0, 0);
   //end of the month
-  const selectedToDate = new Date(2026, 9, 31); 
+  const selectedToDate = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    0
+  );
+  selectedToDate.setHours(23, 59, 59, 999);
+
+
+  useEffect(() => {
+    registerForPushNotificationsAsync()
+      .then((token) => setExpoPushToken(token ?? ""))
+      .catch((error: any) => setExpoPushToken(`${error}`));
+
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        setNotification(notification);
+      }
+    );
+
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      notificationListener.remove();
+      responseListener.remove();
+    };
+
+  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -49,9 +97,7 @@ export default function TabOneScreen() {
         setMonthlyBudget(budget);
         console.log("Fetched monthly budget:", monthlyBudget);
       });
-    } else {
-      console.error("User ID is not available.");
-    }
+    } 
   }, [userId]);
 
   useEffect(() => {

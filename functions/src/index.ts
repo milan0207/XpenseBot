@@ -13,7 +13,7 @@
 
 import * as functions from "firebase-functions/v1";
 // eslint-disable-next-line max-len
-import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { initializeApp, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
@@ -243,5 +243,65 @@ export const findUserByEmail = functions.https.onCall(
         "Nem található felhasználó"
       );
     }
+  }
+);
+
+export const sendPushNotification = functions.https.onCall(
+  async (data, context) => {
+    const receiverID= data.receiverID;
+    const title = data.title;
+    const body = data.body;
+    const firestore = getFirestore();
+    const userRef = firestore.collection("users").doc(receiverID);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      console.error("User document not found");
+      throw new functions.https.HttpsError(
+        "not-found",
+        "User document not found"
+      );
+    }
+    const userData = userDoc.data();
+    if (!userData) {
+      console.error("User data not found");
+      throw new functions.https.HttpsError(
+        "not-found",
+        "User data not found"
+      );
+    }
+    const expoPushToken = userData.pushToken;
+    if (!expoPushToken) {
+      console.error("Expo push token not found");
+      throw new functions.https.HttpsError(
+        "not-found",
+        "Expo push token not found"
+      );
+    }
+    const message = {
+      to: expoPushToken,
+      sound: "default",
+      title: title,
+      body: body,
+      data: { someData: "goes here" },
+    };
+    try {
+      await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
+      console.log("Push notification sent successfully");
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+      throw new functions.https.HttpsError(
+        "internal",
+        "Error sending push notification"
+      );
+    }
+    return { success: true };
   }
 );

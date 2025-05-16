@@ -4,8 +4,8 @@ import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebase/firebaseConfig";
 import { uploadImage } from "../lib/uploadImage";
-import { listenForResults } from "../lib/firestore";
-import ResultListenerComponent from "../lib/firestore";
+import { listenForResults } from "../lib/receiptDb";
+import ResultListenerComponent from "../lib/receiptDb";
 import * as ImagePicker from "expo-image-picker";
 
 export default function CustomCameraView({

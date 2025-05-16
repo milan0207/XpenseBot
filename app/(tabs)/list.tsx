@@ -9,7 +9,7 @@ import DateFilter from "@/components/DateFilter";
 import ReceitpModel from "@/models/ReceiptModel";
 import ItemModel from "@/models/ItemModel";
 import ReceiptBox from "@/components/ReceiptBox";
-import { getItems, getReceipts, getSharedReceipts } from "@/lib/firestore";
+import { getItems, getReceipts, getSharedReceipts } from "@/lib/receiptDb";
 import { auth } from "@/firebase/firebaseConfig";
 import { router } from "expo-router";
 import ReceiptModel from "@/models/ReceiptModel";

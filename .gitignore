@@ -49,3 +49,11 @@ functions/keys/firebase-service-account.json
 # gemini key
 functions/keys/geminiKey.txt
 
+service-account-google.json
+google-services.json
+
+android/
+/android
+ios/
+
+.easignore

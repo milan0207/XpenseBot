@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "@/components/CustomButton";
 import { getAuth, signOut } from "firebase/auth";
 import FormField from "@/components/FormField";
-import {getMonthlyBudget, saveMonthlyBudget} from "@/lib/firestore";
+import {getMonthlyBudget, saveMonthlyBudget} from "@/lib/receiptDb";
 import { get } from "firebase/database";
 
 export default function SettingsScreen() {

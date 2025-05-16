@@ -11,21 +11,13 @@ import {
   serverTimestamp,
   Timestamp,
   updateDoc,
-  CollectionReference,
-  DocumentData,
   setDoc,
   doc,
   getDoc,
-  writeBatch,
-  arrayUnion,
-  getDocs,
-  Query,
 } from "firebase/firestore";
-import { useEffect } from "react";
 import receiptModel from "@/models/ReceiptModel";
 import ItemModel from "@/models/ItemModel";
-import { functions } from "@/firebase/firebaseConfig";
-import { httpsCallable } from "firebase/functions";
+
 
 export const listenForResults = (userId: string, callback: (text: string) => void) => {
   const q = query(
@@ -191,125 +183,9 @@ export const getMonthlyBudget = async (userId: string) => {
   }
 
   const data = docSnap.data();
+  console.log("data from firestore: ", data);
   // Return 0 if monthlyBudget hasn't been set yet
   return data.monthlyBudget ?? 0;
-};
-
-export const sendFriendRequestByEmail = async (
-  senderId: string,
-  receiverEmail: string
-) => {
-  try {
-    console.log("senderId: ", senderId);
-    // 1. Email alapján UID lekérése Cloud Function-nel
-    const findUser = httpsCallable(functions, "findUserByEmail");
-    const response = await findUser({ email: receiverEmail });
-    console.log("findUser response: ", response);
-    const receiver = response.data as { uid: string; email: string };
-
-    // 2. Ellenőrzések
-    if (receiver.uid === senderId) {
-      throw new Error("Nem küldhetsz kérést saját magadnak");
-    }
-    console.log("receiver: ", receiver.uid);
-    console.log("sender: ", senderId);
-    // 3. Duplikált kérések ellenőrzése
-    const requestsRef = collection(firestore, "friendRequests");
-    const existingQuery = query(
-      requestsRef,
-      where("from", "==", senderId),
-      where("to", "==", receiver.uid),
-      where("status", "in", ["pending", "accepted"])
-    );
-
-    const existingSnapshot = await getDocs(existingQuery);
-    if (!existingSnapshot.empty) {
-      throw new Error("Már létezik aktív kérelem");
-    }
-
-    // 4. Kérés létrehozása
-    await addDoc(requestsRef, {
-      from: senderId,
-      to: receiver.uid,
-      status: "pending",
-      createdAt: serverTimestamp(),
-      receiverEmail: receiver.email,
-      senderEmail: (await auth.currentUser?.email) || "ismeretlen",
-    });
-
-    return { success: true, receiverId: receiver.uid };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error sending friend request:", error);
-      throw new Error(error.message || "Hiba a kérés küldésekor");
-     
-    } else {
-      throw new Error("Hiba a kérés küldésekor");
-    }
-  }
-};
-
-export const getFriendRequests = async (userId: string) => {
-  const q = query(
-    collection(firestore, "friendRequests"),
-    where("to", "==", userId),
-    where("status", "==", "pending"),
-    orderBy("createdAt", "desc")
-  );
-
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-export const acceptFriendRequest = async (requestId: string) => {
-  const requestRef = doc(firestore, "friendRequests", requestId);
-  const batch = writeBatch(firestore);
-
-  // 1. Get request data with error handling
-  const requestSnap = await getDoc(requestRef);
-  if (!requestSnap.exists()) {
-    throw new Error("Friend request not found");
-  }
-
-  const { from, to } = requestSnap.data()!;
-  console.log("Updating friends for users:", { from, to });
-
-  //sets also the email of the sender
-
-  const toEmail= requestSnap.data()?.receiverEmail;
-  const fromEmail= requestSnap.data()?.senderEmail;
-
-  // 3. Use setDoc with merge instead of update
-  batch.set(
-    doc(firestore, "users", from),
-    {
-      friends: arrayUnion({
-        id: to,
-        email: toEmail,
-      }),
-    },
-    { merge: true }
-  );
-
-  batch.set(
-    doc(firestore, "users", to),
-    {
-      friends: arrayUnion({
-        id: from,
-        email: fromEmail,
-      }),
-    },
-    { merge: true }
-  );
-
-  // 4. Update request status
-  batch.update(requestRef, { status: "accepted" });
-
-  await batch.commit();
-};
-
-export const rejectFriendRequest = async (requestId: string) => {
-  await deleteDoc(doc(firestore, "friendRequests", requestId));
 };
 
 // Shared Receipts Access
@@ -325,12 +201,12 @@ export const getSharedReceipts = async (
   console.log("toDate: from firestore shared", toDate);
   const userRef = doc(firestore, "users", userId);
   const userSnap = await getDoc(userRef);
-  const friends  = userSnap.data()?.friends || [];
+  const friends = userSnap.data()?.friends || [];
 
   const unsubscribers: (() => void)[] = [];
   console.log("friends from firestore shared: ", friends);
   console.log("running get shared receipts");
-  friends.forEach((friend: { id: string; }) => {
+  friends.forEach((friend: { id: string }) => {
     const q = query(
       collection(firestore, "users", friend.id, "receipts"),
       where("date", ">=", fromTimestamp),
@@ -342,7 +218,7 @@ export const getSharedReceipts = async (
       const friendReceipts: receiptModel[] = snapshot.docs.map((doc) => {
         const data = doc.data();
         const date = new Date(data.date.seconds * 1000);
-    console.log("date from firestore: ", date);
+        console.log("date from firestore: ", date);
         return {
           id: doc.id,
           store_name: data.store_name,
@@ -350,7 +226,7 @@ export const getSharedReceipts = async (
           total_amount: data.total_amount,
           currency: data.currency || "RON",
           items: data.items || [],
-          createdAt: data.createdAt || null, 
+          createdAt: data.createdAt || null,
           owner: friend.id,
         };
       });
@@ -361,33 +237,6 @@ export const getSharedReceipts = async (
     unsubscribers.push(unsubscribe);
   });
 
-  // Optional: Return a function to unsubscribe all listeners
+  // Return a function to unsubscribe all listeners
   return () => unsubscribers.forEach((unsub) => unsub());
 };
-
-export const getFriends = async (userId: string) => {
-  const docRef = doc(firestore, "users", userId);
-  const snapshot = await getDoc(docRef);
-
-  if (snapshot.exists()) {
-    const data = snapshot.data();
-    const friends = data.friends || [];
-    console.log("friends from firestore:", friends);
-    return friends;
-  } else {
-    console.log("User not found");
-    return [];
-  }
-};
-
-export const getUnreadNotificationsCount = async (userId: string) => {
-  const q = query(
-    collection(firestore, "friendRequests"),
-    where("to", "==", userId),
-    where("status", "==", "pending")
-  );
-
-  const snapshot = await getDocs(q);
-  console.log("unread notifications count: ", snapshot.size);
-  return snapshot.size;
-}
