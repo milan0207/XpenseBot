@@ -36,7 +36,7 @@ const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, value, onChang
           } bg-black-100`}
         >
           <Text className="flex-1 text-white font-psemibold text-base">
-            {value ? value.toLocaleDateString() : ""}
+            {value ? value.toLocaleDateString("ro-RO") : ""}
           </Text>
         </View>
       </Pressable>

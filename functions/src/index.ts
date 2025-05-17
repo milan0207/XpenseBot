@@ -175,7 +175,6 @@ export const processUploadedImage = functions.storage
             responseMimeType: "application/json",
           },
         });
-        console.log(response.text);
         parsedResponse = response.text || "No response text available";
       }
 
@@ -198,7 +197,6 @@ export const processUploadedImage = functions.storage
         .move(`processed/${userId}/${path.basename(filePath)}`);
 
       console.log("Successfully processed:", filePath);
-      console.log("Extracted text:", extractedText);
       return null;
     } catch (error) {
       console.error("Error processing file:", filePath, error);

@@ -53,30 +53,70 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
             onPress={() => {
               setSelectedFilter(filter);
               if (filter === "Today") {
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const todayEnd = new Date();
-                todayEnd.setHours(23, 59, 59, 999);
+                const now = new Date();
+                const todayStart = new Date(
+                  now.getFullYear(),
+                  now.getMonth(),
+                  now.getDate(),
+                  0,
+                  0,
+                  0,
+                  0
+                );
+                const todayEnd = new Date(
+                  now.getFullYear(),
+                  now.getMonth(),
+                  now.getDate(),
+                  23,
+                  59,
+                  59,
+                  999
+                );
+
                 setFromDate(todayStart);
                 setToDate(todayEnd);
                 onFromSelect(todayStart);
                 onToSelect(todayEnd);
               } else if (filter === "Week") {
-                const today = new Date();
-                const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-                const weekEnd = new Date(today.setDate(today.getDate() + 6 - today.getDay()));
-                setFromDate(weekStart);
-                setToDate(weekEnd);
-                onFromSelect(weekStart);
-                onToSelect(weekEnd);
+                const now = new Date();
+                const dayOfWeek = now.getDay() || 7; // Sunday = 0 => make it 7
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - dayOfWeek + 1);
+                monday.setHours(0, 0, 0, 0);
+
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                sunday.setHours(23, 59, 59, 999);
+
+                setFromDate(monday);
+                setToDate(sunday);
+                onFromSelect(monday);
+                onToSelect(sunday);
               } else if (filter === "Month") {
-                const today = new Date();
-                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                setFromDate(monthStart);
-                setToDate(monthEnd);
-                onFromSelect(monthStart);
-                onToSelect(monthEnd);
+                const now = new Date();
+                const firstDay = new Date(
+                  now.getFullYear(),
+                  now.getMonth(),
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                );
+                const lastDay = new Date(
+                  now.getFullYear(),
+                  now.getMonth() + 1,
+                  0,
+                  23,
+                  59,
+                  59,
+                  999
+                );
+
+                setFromDate(firstDay);
+                setToDate(lastDay);
+                onFromSelect(firstDay);
+                onToSelect(lastDay);
               }
             }}
             className={`px-3 py-2 rounded-2xl mr-2 ${

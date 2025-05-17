@@ -34,6 +34,7 @@ export const listenForResults = (userId: string, callback: (text: string) => voi
         //delete the document after processing
         //We do not need it anymore
         await deleteDoc(change.doc.ref);
+        console.log("Document deleted after processing: ", change.doc.id);
       }
     });
   });

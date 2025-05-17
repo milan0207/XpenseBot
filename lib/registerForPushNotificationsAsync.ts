@@ -74,7 +74,7 @@ export async function registerForPushNotificationsAsync() {
         handleRegistrationError("User not found");
         return;
       }
-      if(await getPushToken(userId) === pushTokenString) {
+      if(await getPushToken(userId) != pushTokenString) {
         savePushToken(userId, pushTokenString);
       }
       console.log("pushtoken: " + pushTokenString);

@@ -183,6 +183,7 @@ export default function AddScreen() {
       setTotalAmount(receipt.total_amount);
       setDate(new Date(receipt.date).toISOString());
       setSelectedDate(new Date(receipt.date));
+      console.log("New Date: ", selectedDate)
     } catch (error) {
       console.error("Error parsing receipt data:", error);
       setStoreName("Error parsing receipt");
