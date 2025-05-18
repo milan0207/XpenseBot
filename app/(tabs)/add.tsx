@@ -1,5 +1,6 @@
-import { StyleSheet, View, Text,ScrollView,Modal } from "react-native";
-import { useState,useEffect, SetStateAction } from "react";
+import React from "react";
+import { View, Text, ScrollView, Modal } from "react-native";
+import { useState, useEffect } from "react";
 import CustomButtonWIcon from "@/components/CustomButtonWIcon";
 import CameraView from "@/components/CustomCameraView";
 import FormField from "@/components/FormField";
@@ -8,13 +9,12 @@ import { auth } from "@/firebase/firebaseConfig";
 import { listenForResults } from "@/lib/receiptDb";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ItemBox from "@/components/ItemBox";
-import receiptModel from "@/models/ReceiptModel"
+import receiptModel from "@/models/ReceiptModel";
 import itemModel from "@/models/ItemModel";
 import EditItemScreen from "@/components/EditItemScreen"; // adjust path as needed
 import { saveReceipt } from "@/lib/receiptDb";
 import { useLocalSearchParams } from "expo-router";
 import { v4 as uuidv4 } from "uuid";
-
 
 export default function AddScreen() {
   const [showCamera, setShowCamera] = useState(false);
@@ -22,7 +22,6 @@ export default function AddScreen() {
   const [storeName, setStoreName] = useState("");
   const [totalAmount, setTotalAmount] = useState(0);
   const [products, setProducts] = useState<itemModel[]>([]);
-  const [date, setDate] = useState("");
   const userId = auth.currentUser?.uid;
   const [unsubscribe, setUnsubscribe] = useState<() => void>();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -36,20 +35,22 @@ export default function AddScreen() {
   const params = useLocalSearchParams();
   let receipt: receiptModel | null = null;
   useEffect(() => {
-
     return () => {
       // Ha van unsubscribe, azt is töröljük
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [ unsubscribe]);
+  }, [unsubscribe]);
 
   useEffect(() => {
-     // Ha még nem töltöttük be a receipt-et, töltsük be egyszer
+    // Ha még nem töltöttük be a receipt-et, töltsük be egyszer
     if (!receipt && params.receipt) {
       receipt = JSON.parse(params.receipt as string);
-      (params.receipt as any) = null; // Eltávolítjuk a receipt paramétert
+      // Remove the receipt property in a type-safe way
+      if ("receipt" in params) {
+        delete (params as Record<string, unknown>).receipt;
+      }
 
       // Most beállítjuk az állapotokat
       if (receipt) {
@@ -57,15 +58,13 @@ export default function AddScreen() {
         setStoreName(receipt.store_name);
         setTotalAmount(receipt.total_amount);
         setProducts(receipt.items);
-        setDate(new Date(receipt.date).toISOString());
         setSelectedDate(new Date(receipt.date));
         console.log("receiptID from add.tsx " + receipt?.id);
         setReceiptID(receipt?.id);
-        receipt = null; 
+        receipt = null;
       }
     }
-  }, [params.receipt]); 
-
+  }, [params.receipt]);
 
   const handleSave = async () => {
     const receiptToSave = {
@@ -93,13 +92,10 @@ export default function AddScreen() {
       console.error("Error saving receipt:", error);
       setMessage("Error: saving receipt. Please try again.");
     } finally {
-
       setIsProcessing(false);
-      if(storeName === "" && totalAmount === 0) {
+      if (storeName === "" && totalAmount === 0) {
         setMessage("Receipt deleted successfully!");
-      }
-      else
-      {
+      } else {
         setMessage("Receipt saved successfully!");
       }
       receipt = null;
@@ -121,7 +117,7 @@ export default function AddScreen() {
     setSelectedItem(null);
   };
 
-  const handlePictureSubmitted = (storagePath: string) => {
+  const handlePictureSubmitted = () => {
     if (!userId) return;
     setIsProcessing(true);
     setSelectedDate(null);
@@ -162,28 +158,17 @@ export default function AddScreen() {
         receiptData.total_amount,
         receiptData.currency,
         receiptData.items.map(
-          (item: {
-            id: number;
-            name: string;
-            category: string;
-            price: number;
-          }) =>
-            new itemModel(
-              receiptData.id + item.id,
-              item.name,
-              item.category,
-              item.price
-            )
-        )
+          (item: { id: number; name: string; category: string; price: number }) =>
+            new itemModel(receiptData.id + item.id, item.name, item.category, item.price),
+        ),
       );
 
       // Update products state
       setProducts(receipt.items);
       setStoreName(receipt.store_name);
       setTotalAmount(receipt.total_amount);
-      setDate(new Date(receipt.date).toISOString());
       setSelectedDate(new Date(receipt.date));
-      console.log("New Date: ", selectedDate)
+      console.log("New Date: ", selectedDate);
     } catch (error) {
       console.error("Error parsing receipt data:", error);
       setStoreName("Error parsing receipt");
@@ -249,9 +234,8 @@ export default function AddScreen() {
                   setStoreName("");
                   setTotalAmount(0);
                   setSelectedDate(null);
-                  setDate("");
                   setCurrency("");
-                  (params.receipt as any) = null;
+                  (params as Record<string, unknown>).receipt = null;
                   receipt = null;
                 }}
                 iconName={"clear"}
@@ -261,11 +245,7 @@ export default function AddScreen() {
 
             <View>
               {products.map((product: itemModel) => (
-                <ItemBox
-                  key={product.id}
-                  item={product}
-                  handlePress={() => itemPressed(product)}
-                />
+                <ItemBox key={product.id} item={product} handlePress={() => itemPressed(product)} />
               ))}
             </View>
 
@@ -292,8 +272,8 @@ export default function AddScreen() {
                             prev.map((p) =>
                               p.id === updatedItem.id
                                 ? { ...p, ...updatedItem } // Update the item with the same ID
-                                : p
-                            )
+                                : p,
+                            ),
                           );
                         } else {
                           // If not editing, add the new item with a unique ID
@@ -320,9 +300,7 @@ export default function AddScreen() {
             {message && (
               <Text
                 className={`text-lg font-pmedium mx-7 my-3 ${
-                  message.startsWith("Error")
-                    ? "text-redAccent"
-                    : "text-greenAccent"
+                  message.startsWith("Error") ? "text-redAccent" : "text-greenAccent"
                 }`}
               >
                 {message}

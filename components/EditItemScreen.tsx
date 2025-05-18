@@ -36,9 +36,11 @@ export default function EditItemScreen({
 
   return (
     <View className="w-full">
-      <Text className="text-white text-2xl font-bold mb-4 text-center">
-        Edit Item
-      </Text>
+      <View>
+        <Text className="text-white text-2xl font-bold mb-4 text-center">
+          Edit Item
+        </Text>
+      </View>
 
       {/* Name field */}
       <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">

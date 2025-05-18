@@ -4,8 +4,6 @@ import { Tabs, router, usePathname } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
-import { Href, useRouter } from "expo-router";
-import { useSegments } from "expo-router";
 interface TabIconProps {
   color: string;
   name: string;
@@ -16,12 +14,7 @@ const unprotectedRoutes = ["/sign-in", "/sign-up"]; // routes that don't require
 const TabIcon = ({ color, name, focused, iconName }: TabIconProps) => {
   return (
     <View className="items-center justify-center" style={{ minWidth: 80 }}>
-      <AntDesign
-        name={iconName}
-        size={24}
-        color={color}
-        style={{ marginBottom: 2 }}
-      />
+      <AntDesign name={iconName} size={24} color={color} style={{ marginBottom: 2 }} />
       <Text
         className={`${focused ? "font-psemibold" : "font-pregular"} text-xs`}
         style={{ color: color }}
@@ -65,12 +58,7 @@ const TabsLayout = () => {
         name="index"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              color={color}
-              name="Home"
-              focused={focused}
-              iconName="home"
-            />
+            <TabIcon color={color} name="Home" focused={focused} iconName="home" />
           ),
         }}
       />
@@ -79,12 +67,7 @@ const TabsLayout = () => {
         name="add"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              color={color}
-              name="Add"
-              focused={focused}
-              iconName="pluscircleo"
-            />
+            <TabIcon color={color} name="Add" focused={focused} iconName="pluscircleo" />
           ),
         }}
       />
@@ -93,12 +76,7 @@ const TabsLayout = () => {
         name="list"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              color={color}
-              name="Receipts"
-              focused={focused}
-              iconName="filetext1"
-            />
+            <TabIcon color={color} name="Receipts" focused={focused} iconName="filetext1" />
           ),
         }}
       />
@@ -107,12 +85,7 @@ const TabsLayout = () => {
         name="settings"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              color={color}
-              name="Settings"
-              focused={focused}
-              iconName="setting"
-            />
+            <TabIcon color={color} name="Settings" focused={focused} iconName="setting" />
           ),
         }}
       />
