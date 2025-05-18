@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import { View, Text, TouchableOpacity } from "react-native";
 
 const SwitchableButton = ({
@@ -18,9 +19,7 @@ const SwitchableButton = ({
   };
 
   return (
-    <View
-      className={`flex-row rounded-full p-1 ${containerStyles}`}
-    >
+    <View className={`flex-row rounded-full p-1 ${containerStyles}`}>
       {/* First Option */}
       <TouchableOpacity
         className={`flex-1 items-center py-3 rounded-full ${
@@ -30,9 +29,7 @@ const SwitchableButton = ({
       >
         <Text
           className={`text-base font-semibold ${
-            selected === title1
-              ? selectedTextStyles
-              : `text-white ${textStyles}`
+            selected === title1 ? selectedTextStyles : `text-white ${textStyles}`
           }`}
         >
           {title1}
@@ -48,9 +45,7 @@ const SwitchableButton = ({
       >
         <Text
           className={`text-base font-semibold ${
-            selected === title2
-              ? selectedTextStyles
-              : `text-white ${textStyles}`
+            selected === title2 ? selectedTextStyles : `text-white ${textStyles}`
           }`}
         >
           {title2}
@@ -58,6 +53,15 @@ const SwitchableButton = ({
       </TouchableOpacity>
     </View>
   );
+};
+SwitchableButton.propTypes = {
+  title1: PropTypes.string,
+  title2: PropTypes.string,
+  onSelect: PropTypes.func,
+  containerStyles: PropTypes.string,
+  textStyles: PropTypes.string,
+  selectedTextStyles: PropTypes.string,
+  selectedBgStyle: PropTypes.string,
 };
 
 export default SwitchableButton;

@@ -1,5 +1,7 @@
+import React from "react";
+import PropTypes from "prop-types";
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 const FormField = ({
   title,
@@ -40,29 +42,27 @@ const FormField = ({
 
         {title === "Password" && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Entypo
-              name={showPassword ? "eye-with-line" : "eye"}
-              size={24}
-              color="black"
-            />
+            <Entypo name={showPassword ? "eye-with-line" : "eye"} size={24} color="black" />
           </TouchableOpacity>
         )}
         {title === "Confirm Password" && (
           <TouchableOpacity onPress={() => setShowPassword2(!showPassword2)}>
-            <Entypo
-              name={showPassword2 ? "eye-with-line" : "eye"}
-              size={24}
-              color="black"
-            />
+            <Entypo name={showPassword2 ? "eye-with-line" : "eye"} size={24} color="black" />
           </TouchableOpacity>
         )}
       </View>
 
-      {error ? (
-        <Text className="text-red-500 text-sm ml-2 mt-1">{error}</Text>
-      ) : null}
+      {error ? <Text className="text-red-500 text-sm ml-2 mt-1">{error}</Text> : null}
     </View>
   );
+};
+FormField.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.string,
+  placeholder: PropTypes.string,
+  handleChangeText: PropTypes.func,
+  otherStyles: PropTypes.string,
+  error: PropTypes.string,
 };
 
 export default FormField;

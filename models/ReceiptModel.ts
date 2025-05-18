@@ -8,7 +8,7 @@ class ReceitpModel {
     public date: Date,
     public total_amount: number,
     public currency: string,
-    public items: Array<ItemModel>
+    public items: Array<ItemModel>,
   ) {}
 }
 

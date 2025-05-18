@@ -5,25 +5,20 @@ import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import images from "../../constants/images";
 
 const validateEmail = (email: string) => {
   return /\S+@\S+\.\S+/.test(email);
 };
 
-const validatePassword = (password: string | any[]) => {
+const validatePassword = (password: string) => {
   const errors = [];
 
   if (password.length < 8) errors.push("At least 8 characters");
   if (!/[A-Z]/.test(password)) errors.push("At least one uppercase letter");
   if (!/[0-9]/.test(password)) errors.push("At least one number");
-  if (!/[!@#$%^&*]/.test(password))
-    errors.push("At least one special character");
+  if (!/[!@#$%^&*]/.test(password)) errors.push("At least one special character");
 
   return errors;
 };
@@ -36,13 +31,17 @@ const SignUp = () => {
     username: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<{
+    email: string;
+    password: string[];
+    password2: string;
+  }>({
     email: "",
     password: [],
     password2: "",
   });
 
-  const handleEmailChange = (email) => {
+  const handleEmailChange = (email: string) => {
     setForm({ ...form, email });
     setErrors({
       ...errors,
@@ -50,12 +49,12 @@ const SignUp = () => {
     });
   };
 
-  const handlePasswordChange = (password) => {
+  const handlePasswordChange = (password: string) => {
     setForm({ ...form, password });
     setErrors({ ...errors, password: validatePassword(password) });
   };
 
-  const handleConfirmPasswordChange = (password2) => {
+  const handleConfirmPasswordChange = (password2: string) => {
     setForm({ ...form, password2 });
     setErrors({
       ...errors,
@@ -76,7 +75,7 @@ const SignUp = () => {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           form.email,
-          form.password
+          form.password,
         );
         const user = userCredential.user;
         await updateProfile(user, { displayName: form.username });
@@ -88,7 +87,11 @@ const SignUp = () => {
         // Navigate to another screen after success (optional)
         // navigation.navigate("Home");
       } catch (error) {
-        console.error("Sign-up error:", error.message);
+        if (error instanceof Error) {
+          console.error("Sign-up error:", error.message);
+        } else {
+          console.error("Sign-up error:", error);
+        }
       }
 
       setIsSubmitting(false);
@@ -103,11 +106,7 @@ const SignUp = () => {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[85vh] px-4 my-6">
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[115px] h-[155px]"
-          />
+          <Image source={images.logo} resizeMode="contain" className="w-[115px] h-[155px]" />
           <Text className="text-2xl text-white text-semibold mt-10 font-psemibold">
             Sign Up to XpenseBot
           </Text>
@@ -115,8 +114,10 @@ const SignUp = () => {
           <FormField
             title="Username"
             value={form.username}
-            handleChangeText={(e) => setForm({ ...form, username: e })}
+            handleChangeText={(e: string) => setForm({ ...form, username: e })}
             otherStyles="mt-7"
+            placeholder={undefined}
+            error={undefined}
           />
 
           <FormField
@@ -126,6 +127,7 @@ const SignUp = () => {
             otherStyles="mt-7"
             keyboardType="email-address"
             error={errors.email}
+            placeholder={undefined}
           />
 
           <FormField
@@ -134,6 +136,7 @@ const SignUp = () => {
             handleChangeText={handlePasswordChange}
             otherStyles="mt-7"
             error={errors.password.join(", ")}
+            placeholder={undefined}
           />
 
           <FormField
@@ -142,6 +145,7 @@ const SignUp = () => {
             handleChangeText={handleConfirmPasswordChange}
             otherStyles="mt-7"
             error={errors.password2}
+            placeholder={undefined}
           />
 
           <CustomButton
@@ -152,13 +156,8 @@ const SignUp = () => {
           />
 
           <View className="justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Already have an account?
-            </Text>
-            <Link
-              className="text-lg font-psemibold text-secondary"
-              href="/sign-in"
-            >
+            <Text className="text-lg text-gray-100 font-pregular">Already have an account?</Text>
+            <Link className="text-lg font-psemibold text-secondary" href="/sign-in">
               Sign In
             </Link>
           </View>

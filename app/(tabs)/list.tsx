@@ -1,6 +1,5 @@
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from "react-native";
-
-import EditScreenInfo from "@/components/EditScreenInfo";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SwitchableButton from "@/components/SwitchableButton";
 import CategoryModal from "@/components/CategoryModal";
@@ -13,9 +12,8 @@ import { getItems, getReceipts, getSharedReceipts } from "@/lib/receiptDb";
 import { auth } from "@/firebase/firebaseConfig";
 import { router } from "expo-router";
 import ReceiptModel from "@/models/ReceiptModel";
-import { get, set } from "firebase/database";
 import ItemBox from "@/components/ItemBox";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function Expenses() {
   const userId = auth.currentUser?.uid;
@@ -31,22 +29,17 @@ export default function Expenses() {
   useEffect(() => {
     if (userId) {
       if (selectedItemType === "Receipts") {
-        getReceipts(
-          userId,
-          selectedFromDate,
-          selectedToDate,
-          (fetchedReceipts: ReceitpModel[]) => {
-            setItems([]);
-            setReceipts(fetchedReceipts);
-          }
-        );
+        getReceipts(userId, selectedFromDate, selectedToDate, (fetchedReceipts: ReceitpModel[]) => {
+          setItems([]);
+          setReceipts(fetchedReceipts);
+        });
         getSharedReceipts(
           userId,
           selectedFromDate,
           selectedToDate,
           (fetchedSharedReceipts: ReceitpModel[]) => {
             setSharedReceipts(fetchedSharedReceipts);
-          }
+          },
         );
       } else if (selectedItemType === "Items") {
         getItems(
@@ -57,34 +50,27 @@ export default function Expenses() {
           (fetchedItems: ItemModel[]) => {
             setReceipts([]);
             setItems(fetchedItems);
-          }
+          },
         );
       }
     } else {
       console.error("User ID is not available.");
     }
-  }, [
-    userId,
-    selectedFromDate,
-    selectedToDate,
-    selectedItemType,
-    selectedCategory,
-  ]);
+  }, [userId, selectedFromDate, selectedToDate, selectedItemType, selectedCategory]);
 
   const onFromDateSelect = (selectedFromDate: Date) => {
     console.log("Selected date from list.tsx:", selectedFromDate);
     setSelectedFromDate(selectedFromDate);
-  }
+  };
   const onToDateSelect = (selectedToDate: Date) => {
     console.log("Selected date:", selectedToDate);
     setSelectedToDate(selectedToDate);
-  }
+  };
 
   const onTypeSelect = (selected: string) => {
     console.log("Selected type:", selected);
     setSelectedItemType(selected);
-  }
-
+  };
 
   return (
     <SafeAreaView className="h-full bg-primary">
@@ -97,7 +83,7 @@ export default function Expenses() {
             <SwitchableButton
               title1="Receipts"
               title2="Items"
-              onSelect={(selected: any) => {
+              onSelect={(selected: string) => {
                 onTypeSelect(selected);
               }}
               containerStyles="mx-5 my-3 bg-secondary"
@@ -105,10 +91,7 @@ export default function Expenses() {
               selectedTextStyles="text-secondary"
             ></SwitchableButton>
             <View className="mx-5 my-3">
-              <DateFilter
-                onFromSelect={onFromDateSelect}
-                onToSelect={onToDateSelect}
-              />
+              <DateFilter onFromSelect={onFromDateSelect} onToSelect={onToDateSelect} />
             </View>
 
             {selectedItemType === "Items" && (
@@ -117,9 +100,7 @@ export default function Expenses() {
                   onPress={() => setShowCategoryModal(true)}
                   className="bg-blackContrast p-3 rounded-xl mb-3 ml-4 my-3 w-3/4"
                 >
-                  <Text className="text-white">
-                    {selectedCategory || "Select category"}
-                  </Text>
+                  <Text className="text-white">{selectedCategory || "Select category"}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -127,19 +108,14 @@ export default function Expenses() {
                     setShowCategoryModal(false);
                   }}
                 >
-                  <AntDesign
-                    name="closecircle"
-                    size={24}
-                    color="grey"
-                    className="my-5 mx-5"
-                  />
+                  <AntDesign name="closecircle" size={24} color="grey" className="my-5 mx-5" />
                 </TouchableOpacity>
               </View>
             )}
             <CategoryModal
               visible={showCategoryModal}
               onClose={() => setShowCategoryModal(false)}
-              onSelect={(category: any) => {
+              onSelect={(category: string) => {
                 console.log("Selected category:", category);
                 setShowCategoryModal(false);
                 setSelectedCategory(category);

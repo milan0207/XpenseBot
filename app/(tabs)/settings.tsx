@@ -1,19 +1,28 @@
-import { StyleSheet, ScrollView,Text,View } from "react-native";
-import React, { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "@/components/CustomButton";
 import { getAuth, signOut } from "firebase/auth";
 import FormField from "@/components/FormField";
-import {getMonthlyBudget, saveMonthlyBudget} from "@/lib/receiptDb";
-import { get } from "firebase/database";
+import { getMonthlyBudget, saveMonthlyBudget } from "@/lib/receiptDb";
 
 export default function SettingsScreen() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSigningOut, setisSigningOut] = useState(false);
   const [showFormfield, setShowFormfield] = useState(false);
   const auth = getAuth();
   const [monthlyBudget, setMonthlyBudget] = useState(0);
 
+  useEffect(() => {
+    const fetchMonthlyBudget = async () => {
+      if (auth.currentUser) {
+        const budget = await getMonthlyBudget(auth.currentUser.uid);
+        setMonthlyBudget(budget);
+      }
+    };
 
+    fetchMonthlyBudget();
+  }, []);
   const signout = () => {
     signOut(auth)
       .then(() => {
@@ -56,10 +65,7 @@ export default function SettingsScreen() {
                   title="Save"
                   handlePress={async () => {
                     console.log("saving monthly budget");
-                    saveMonthlyBudget(
-                      auth.currentUser?.uid || "",
-                      await monthlyBudget
-                    );
+                    saveMonthlyBudget(auth.currentUser?.uid || "", await monthlyBudget);
 
                     setShowFormfield(false);
                   }}

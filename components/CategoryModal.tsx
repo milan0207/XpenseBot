@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import CategoryIcons from "./CategoryIcons";
 import { categories } from "@/assets/images/categoryIcons";
@@ -36,10 +37,7 @@ export default function CategoryModal({
               </View>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity
-            onPress={onClose}
-            className="p-3 mt-2 bg-txtThird rounded-lg"
-          >
+          <TouchableOpacity onPress={onClose} className="p-3 mt-2 bg-txtThird rounded-lg">
             <Text className="text-white text-center">Cancel</Text>
           </TouchableOpacity>
         </View>

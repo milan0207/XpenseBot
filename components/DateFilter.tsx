@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, Touchable, TouchableOpacity, Platform } from "react-native";
+import { View, Text, Pressable, TouchableOpacity, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface DateFilterProps {
@@ -42,8 +43,6 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
     onToSelect(todayEnd);
   }, []);
 
-
-
   return (
     <View className="flex-row">
       <View className="flex-row bg-secondary-lightblack p-0.5 rounded-2xl ">
@@ -61,7 +60,7 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
                   0,
                   0,
                   0,
-                  0
+                  0,
                 );
                 const todayEnd = new Date(
                   now.getFullYear(),
@@ -70,7 +69,7 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
                   23,
                   59,
                   59,
-                  999
+                  999,
                 );
 
                 setFromDate(todayStart);
@@ -94,24 +93,8 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
                 onToSelect(sunday);
               } else if (filter === "Month") {
                 const now = new Date();
-                const firstDay = new Date(
-                  now.getFullYear(),
-                  now.getMonth(),
-                  1,
-                  0,
-                  0,
-                  0,
-                  0
-                );
-                const lastDay = new Date(
-                  now.getFullYear(),
-                  now.getMonth() + 1,
-                  0,
-                  23,
-                  59,
-                  59,
-                  999
-                );
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
                 setFromDate(firstDay);
                 setToDate(lastDay);
@@ -157,4 +140,4 @@ export default function DateFilter({ onFromSelect, onToSelect }: DateFilterProps
       </TouchableOpacity>
     </View>
   );
-};
+}

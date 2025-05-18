@@ -1,3 +1,5 @@
+import React from "react";
+import PropTypes from "prop-types";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "expo-router";
@@ -24,6 +26,9 @@ const AuthGuard = ({ children }) => {
   }
 
   return children;
+};
+AuthGuard.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthGuard;

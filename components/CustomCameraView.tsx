@@ -1,17 +1,15 @@
+import React from "react";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useState, useRef,useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebase/firebaseConfig";
 import { uploadImage } from "../lib/uploadImage";
-import { listenForResults } from "../lib/receiptDb";
-import ResultListenerComponent from "../lib/receiptDb";
 import * as ImagePicker from "expo-image-picker";
 
 export default function CustomCameraView({
   onClose,
   onPictureTaken,
-  onTextExtracted,
   onPictureSubmitted,
 }: {
   onClose: () => void;
@@ -40,13 +38,8 @@ export default function CustomCameraView({
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Text style={styles.message}>
-          We need your permission to show the camera
-        </Text>
-        <TouchableOpacity
-          style={styles.permissionButton}
-          onPress={requestPermission}
-        >
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
           <Text style={styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
       </View>
@@ -71,28 +64,28 @@ export default function CustomCameraView({
     onClose();
   };
   const handlePickFromGallery = async () => {
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
-  if (status !== 'granted') {
-    alert('A galéria eléréséhez engedélyre van szükség!');
-    return;
-  }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images'],
-    allowsEditing: true,
-    quality: 0.8,
-    base64: true,
-  });
-
-  if (!result.canceled && result.assets) {
-    const uri = result.assets[0].uri;
-    setCapturedImage(uri);
-    if (onPictureTaken) {
-      onPictureTaken(uri);
+    if (status !== "granted") {
+      alert("A galéria eléréséhez engedélyre van szükség!");
+      return;
     }
-  }
-}
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets) {
+      const uri = result.assets[0].uri;
+      setCapturedImage(uri);
+      if (onPictureTaken) {
+        onPictureTaken(uri);
+      }
+    }
+  };
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -127,10 +120,7 @@ export default function CustomCameraView({
       <View style={styles.previewContainer}>
         <Image source={{ uri: capturedImage }} style={styles.previewImage} />
         <View style={styles.previewButtons}>
-          <TouchableOpacity
-            style={styles.previewButton}
-            onPress={() => setCapturedImage(null)}
-          >
+          <TouchableOpacity style={styles.previewButton} onPress={() => setCapturedImage(null)}>
             <MaterialIcons name="cancel" size={30} color="white" />
             <Text style={styles.previewButtonText}>Retake</Text>
           </TouchableOpacity>
@@ -160,29 +150,19 @@ export default function CustomCameraView({
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.controlButton} onPress={toggleFlash}>
-            <MaterialIcons
-              name={flash ? "flash-on" : "flash-off"}
-              size={30}
-              color="white"
-            />
+            <MaterialIcons name={flash ? "flash-on" : "flash-off"} size={30} color="white" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.bottomControls}>
-          <TouchableOpacity
-            style={styles.flipButton}
-            onPress={toggleCameraFacing}
-          >
+          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
             <MaterialIcons name="flip-camera-ios" size={30} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
             <View style={styles.captureButtonInner} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.galleryButton}
-            onPress={handlePickFromGallery}
-          >
+          <TouchableOpacity style={styles.galleryButton} onPress={handlePickFromGallery}>
             <MaterialIcons name="photo-library" size={30} color="white" />
           </TouchableOpacity>
 

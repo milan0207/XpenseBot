@@ -1,4 +1,6 @@
-import { StyleSheet, Image, ScrollView, Text, View,TouchableOpacity,Platform } from "react-native";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React from "react";
+import { Image, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import ItemModel from "@/models/ItemModel";
 import images from "../../constants/images";
@@ -7,13 +9,10 @@ import { auth } from "@/firebase/firebaseConfig";
 import "../global.css";
 import tailwindConfig from "../../tailwind.config";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { getItems} from "@/lib/receiptDb";
+import { getItems } from "@/lib/receiptDb";
 import RNEChartsPro from "react-native-echarts-pro";
 import { getMonthlyBudget } from "@/lib/receiptDb";
 import { router } from "expo-router";
-import {firestore} from "@/firebase/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { registerForPushNotificationsAsync } from "@/lib/registerForPushNotificationsAsync";
 
@@ -34,79 +33,64 @@ export default function TabOneScreen() {
   const [moneyAvailable, setMoneyAvailable] = useState(0);
   const [spentThisMonth, setSpentThisMonth] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [itemsProcessed, setItemsProcessed] = useState<
-    Record<string, { total: number; category: string }>
-    | null
-  >(null);
+  const [itemsProcessed, setItemsProcessed] = useState<Record<
+    string,
+    { total: number; category: string }
+  > | null>(null);
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState<
-    Notifications.Notification | undefined
-  >(undefined);
+  const [notification, setNotification] = useState<Notifications.Notification | undefined>(
+    undefined,
+  );
   //start of the month
-  const selectedFromDate =new Date();
+  const selectedFromDate = new Date();
   selectedFromDate.setDate(1);
   selectedFromDate.setHours(0, 0, 0, 0);
   //end of the month
-  const selectedToDate = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 1,
-    0
-  );
+  const selectedToDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
   selectedToDate.setHours(23, 59, 59, 999);
-
 
   useEffect(() => {
     registerForPushNotificationsAsync()
       .then((token) => setExpoPushToken(token ?? ""))
-      .catch((error: any) => setExpoPushToken(`${error}`));
+      .catch((error: unknown) => setExpoPushToken(`${error}`));
 
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        setNotification(notification);
-      }
-    );
+    const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
+      setNotification(notification);
+    });
 
-    const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
+    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log(response);
+    });
 
     return () => {
       notificationListener.remove();
       responseListener.remove();
     };
-
   }, []);
 
   useEffect(() => {
     if (userId) {
-      getItems(
-        userId,
-        selectedFromDate,
-        selectedToDate,
-        "",
-        (fetchedItems: ItemModel[]) => {
-          setItems(fetchedItems);
-          setItemsProcessed(categoryTotals);
-          setSpentThisMonth(totalSpent);
-          setMoneyAvailable(monthlyBudget - totalSpent);
-        }
-      );
+      getItems(userId, selectedFromDate, selectedToDate, "", (fetchedItems: ItemModel[]) => {
+        setItems(fetchedItems);
+        setItemsProcessed(categoryTotals);
+        setSpentThisMonth(totalSpent);
+        setMoneyAvailable(monthlyBudget - totalSpent);
+      });
       console.log("Fetched items:", items);
       getMonthlyBudget(userId).then((budget) => {
         setMonthlyBudget(budget);
         console.log("Fetched monthly budget:", monthlyBudget);
       });
-    } 
+    }
   }, [userId]);
 
   useEffect(() => {
-    if(userId){
+    if (userId) {
       setSpentThisMonth(parseFloat(totalSpent.toFixed(0)));
       setMoneyAvailable(parseFloat((monthlyBudget - totalSpent).toFixed(0)));
     }
-  },[items, monthlyBudget]);
-  
+  }, [items, monthlyBudget]);
+
   const { categoryTotals, totalSpent } = items.reduce(
     (acc, item) => {
       // Update category total
@@ -125,46 +109,52 @@ export default function TabOneScreen() {
     {
       categoryTotals: {} as Record<string, { total: number; category: string }>,
       totalSpent: 0,
-    }
+    },
   );
 
   const processItems = Object.entries(categoryTotals).map(([category, data]) => ({
     category,
-    total:  data.total,
+    total: data.total,
   }));
-  
-  const colors = tailwindConfig?.theme?.extend?.colors as {
-    [key: string]: any;
-  };
-  const secondaryColor = colors?.secondary?.DEFAULT || "#000";
-    const pieOption = {
-      series: [
-        {
-          name: "Source",
-          type: "pie",
-          legendHoverLink: true,
-          hoverAnimation: true,
-          avoidLabelOverlap: true,
-          startAngle: 180,
-          radius: "55%",
-          center: ["50%", "35%"],
-          data: processItems.map((item) => ({
-            value: item.total,
-            name: item.category,
-          })),
 
-          label: {
-            normal: {
-              show: true,
-              textStyle: {
-                fontSize: 15,
-                color: { secondaryColor },
-              },
+  const colors = tailwindConfig?.theme?.extend?.colors as {
+    [key: string]: unknown;
+  };
+  const secondaryColor: string =
+    typeof colors?.secondary === "string"
+      ? colors.secondary
+      : (colors?.secondary &&
+        typeof (colors.secondary as { DEFAULT?: unknown }).DEFAULT === "string"
+          ? (colors.secondary as { DEFAULT?: string }).DEFAULT
+          : undefined) || "#000";
+  const pieOption = {
+    series: [
+      {
+        name: "Source",
+        type: "pie",
+        legendHoverLink: true,
+        hoverAnimation: true,
+        avoidLabelOverlap: true,
+        startAngle: 180,
+        radius: "55%",
+        center: ["50%", "35%"],
+        data: processItems.map((item) => ({
+          value: item.total,
+          name: item.category,
+        })),
+
+        label: {
+          normal: {
+            show: true,
+            textStyle: {
+              fontSize: 15,
+              color: { secondaryColor },
             },
           },
         },
-      ],
-    };
+      },
+    ],
+  };
 
   return (
     <SafeAreaView className="h-full bg-primary">
@@ -192,10 +182,10 @@ export default function TabOneScreen() {
               className="mr-5 mt-5"
             />
             {notificationCount > 0 && (
-            <View className="absolute top-4 right-6 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
-              <Text className="text-white text-xs">{notificationCount}</Text>
-            </View>
-)}
+              <View className="absolute top-4 right-6 bg-red-500 rounded-full w-5 h-5 justify-center items-center">
+                <Text className="text-white text-xs">{notificationCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
         <View className="w-full flex-col items-left justify-center">
@@ -207,23 +197,15 @@ export default function TabOneScreen() {
           </Text>
           <View className="w-full flex-row items-center">
             <Text className="text-xl text-txtThird ml-5">Monthly income:</Text>
-            <Text className="text-xl text-greenAccent ml-3">
-              {monthlyBudget} RON
-            </Text>
+            <Text className="text-xl text-greenAccent ml-3">{monthlyBudget} RON</Text>
           </View>
           <View className="w-full flex-row items-center mt-1">
-            <Text className="text-xl text-txtThird ml-5">
-              Spent this month:
-            </Text>
-            <Text className="text-xl text-redAccent ml-1 ">
-              {spentThisMonth} RON
-            </Text>
+            <Text className="text-xl text-txtThird ml-5">Spent this month:</Text>
+            <Text className="text-xl text-redAccent ml-1 ">{spentThisMonth} RON</Text>
           </View>
         </View>
         <View className="w-full flex-column items-center mt-10">
-          <Text className="text-2xl text-txtSecondary font-iregular mb-10">
-            Monthly expenses:
-          </Text>
+          <Text className="text-2xl text-txtSecondary font-iregular mb-10">Monthly expenses:</Text>
           <RNEChartsPro height={350} option={pieOption} />
         </View>
       </ScrollView>

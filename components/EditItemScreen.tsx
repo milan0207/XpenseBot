@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import CustomButton from "./CustomButton";
@@ -37,15 +38,11 @@ export default function EditItemScreen({
   return (
     <View className="w-full">
       <View>
-        <Text className="text-white text-2xl font-bold mb-4 text-center">
-          Edit Item
-        </Text>
+        <Text className="text-white text-2xl font-bold mb-4 text-center">Edit Item</Text>
       </View>
 
       {/* Name field */}
-      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">
-        Name
-      </Text>
+      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">Name</Text>
       <TextInput
         value={name}
         onChangeText={setName}
@@ -55,9 +52,7 @@ export default function EditItemScreen({
       />
 
       {/* Category field */}
-      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">
-        Category
-      </Text>
+      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">Category</Text>
       <TouchableOpacity
         onPress={() => setShowCategoryModal(true)}
         className="bg-blackContrast p-3 rounded-xl mb-3"
@@ -74,9 +69,7 @@ export default function EditItemScreen({
       />
 
       {/* Price field */}
-      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">
-        Price (RON)
-      </Text>
+      <Text className="text-lg text-gray-100 font-pmedium mt-2 mb-1 ml-1">Price (RON)</Text>
       <TextInput
         value={price}
         onChangeText={setPrice}

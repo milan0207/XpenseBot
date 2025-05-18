@@ -1,10 +1,8 @@
 import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import React from "react";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { View } from "react-native";
+import PropTypes from "prop-types";
 import tailwindConfig from "../tailwind.config.js";
 const CustomButtonWIcon = ({
   title,
@@ -12,10 +10,10 @@ const CustomButtonWIcon = ({
   containerStyles = "",
   textStyles = "",
   isLoading = false,
-  iconName
+  iconName,
 }) => {
   const colors = tailwindConfig?.theme?.extend?.colors || {};
-    const secondaryColor = colors?.secondary?.DEFAULT || "#000";
+  const secondaryColor = colors?.secondary?.DEFAULT || "#000";
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -29,21 +27,20 @@ const CustomButtonWIcon = ({
         <ActivityIndicator size="small" color="#FFFFFF" />
       ) : (
         <View className="flex-row items-center justify-center w-full ">
-          <Text
-            className={`text-txtPrimary font-semibold text-lg ${textStyles}`}
-          >
-            {title}
-          </Text>
-          <MaterialIcons
-            name={iconName}
-            size={24}
-            color={secondaryColor}
-            className="pl-1"
-          />
+          <Text className={`text-txtPrimary font-semibold text-lg ${textStyles}`}>{title}</Text>
+          <MaterialIcons name={iconName} size={24} color={secondaryColor} className="pl-1" />
         </View>
       )}
     </TouchableOpacity>
   );
+};
+CustomButtonWIcon.propTypes = {
+  title: PropTypes.string.isRequired,
+  handlePress: PropTypes.func.isRequired,
+  containerStyles: PropTypes.string,
+  textStyles: PropTypes.string,
+  isLoading: PropTypes.bool,
+  iconName: PropTypes.string.isRequired,
 };
 
 export default CustomButtonWIcon;

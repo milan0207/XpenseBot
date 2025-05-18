@@ -1,4 +1,4 @@
-import { firestore,auth } from "@/firebase/firebaseConfig";
+import { firestore } from "@/firebase/firebaseConfig";
 import {
   collection,
   query,
@@ -18,16 +18,15 @@ import {
 import receiptModel from "@/models/ReceiptModel";
 import ItemModel from "@/models/ItemModel";
 
-
 export const listenForResults = (userId: string, callback: (text: string) => void) => {
   const q = query(
     collection(firestore, "documentResults"),
     where("userId", "==", userId),
     orderBy("processedAt", "desc"),
-    limit(1)
+    limit(1),
   );
-  console.log("running the ")
-  return onSnapshot(q,async (snapshot) => {
+  console.log("running the ");
+  return onSnapshot(q, async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       if (change.type === "added") {
         callback(change.doc.data().parsedResponse as string);
@@ -49,17 +48,15 @@ export const saveReceipt = async (receipt: receiptModel, userId: string) => {
   }));
   try {
     // Convert items to plain objects
-    
+
     if (!(receipt.date instanceof Date)) {
       console.error("Invalid or missing date:", receipt.date);
       throw new Error("receipt.date must be a valid Date object");
     }
-    const timestampDate=Timestamp.fromDate(receipt.date);
+    const timestampDate = Timestamp.fromDate(receipt.date);
     console.log("receiptID: ", receipt.id);
-  if (!receipt.id) {
-    const docRef = await addDoc(
-      collection(firestore, "users", userId, "receipts"),
-      {
+    if (!receipt.id) {
+      const docRef = await addDoc(collection(firestore, "users", userId, "receipts"), {
         store_name: receipt.store_name,
         date: timestampDate,
         total_amount: receipt.total_amount,
@@ -68,11 +65,10 @@ export const saveReceipt = async (receipt: receiptModel, userId: string) => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         userId: userId,
-      }
-    );
-    await updateDoc(docRef, { id: docRef.id });
-    return docRef.id;
-  }
+      });
+      await updateDoc(docRef, { id: docRef.id });
+      return docRef.id;
+    }
   } catch (error) {
     console.error("Error saving receipt:", error);
     throw error;
@@ -83,7 +79,7 @@ export const saveReceipt = async (receipt: receiptModel, userId: string) => {
     const docRef = doc(collection(firestore, "users", userId, "receipts"), receipt.id);
     if (receipt.store_name === "" && receipt.total_amount === 0) {
       deleteDoc(docRef);
-      return receipt.id;      
+      return receipt.id;
     }
     await updateDoc(docRef, {
       store_name: receipt.store_name,
@@ -93,16 +89,19 @@ export const saveReceipt = async (receipt: receiptModel, userId: string) => {
       items: items, // Use the converted plain objects
       updatedAt: serverTimestamp(),
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error updating receipt:", error);
     throw error;
   }
   return receipt.id;
 };
 
-export const getReceipts = async (userId: string,fromDate:Date,toDate:Date, callback: (receipts: receiptModel[]) => void) => {
-  
+export const getReceipts = async (
+  userId: string,
+  fromDate: Date,
+  toDate: Date,
+  callback: (receipts: receiptModel[]) => void,
+) => {
   const fromTimestamp = Timestamp.fromDate(fromDate);
   const toTimestamp = Timestamp.fromDate(toDate);
   console.log("fromDate: from firestore", fromDate);
@@ -112,13 +111,13 @@ export const getReceipts = async (userId: string,fromDate:Date,toDate:Date, call
     collection(firestore, "users", userId, "receipts"),
     where("date", ">=", fromTimestamp),
     where("date", "<=", toTimestamp),
-    orderBy("date", "desc")
+    orderBy("date", "desc"),
   );
-  console.log("running the get receipts")
+  console.log("running the get receipts");
   return onSnapshot(q, (snapshot) => {
     const receipts: receiptModel[] = snapshot.docs.map((doc) => {
       const data = doc.data();
-      const date=new Date(data.date.seconds*1000);
+      const date = new Date(data.date.seconds * 1000);
       return {
         id: doc.id,
         store_name: data.store_name,
@@ -130,14 +129,14 @@ export const getReceipts = async (userId: string,fromDate:Date,toDate:Date, call
     });
     callback(receipts);
   });
-}
+};
 
 export const getItems = (
   userId: string,
   fromDate: Date,
   toDate: Date,
   category: string,
-  callback: (items: ItemModel[]) => void
+  callback: (items: ItemModel[]) => void,
 ) => {
   const fromTimestamp = Timestamp.fromDate(fromDate);
   const toTimestamp = Timestamp.fromDate(toDate);
@@ -146,22 +145,22 @@ export const getItems = (
     collection(firestore, "users", userId, "receipts"),
     where("date", ">=", fromTimestamp),
     where("date", "<=", toTimestamp),
-    orderBy("date", "desc")
+    orderBy("date", "desc"),
   );
-  console.log("running the get items")
+  console.log("running the get items");
   return onSnapshot(q, (snapshot) => {
     const items: ItemModel[] = [];
     let i = 100;
     snapshot.docs.forEach((doc) => {
       const data = doc.data();
       const receiptItems = data.items || [];
-      
+
       receiptItems.forEach((it: any) => {
         if (!category || it.category === category) {
-          items.push(new ItemModel( i+it.id, it.name, it.category, it.price));
+          items.push(new ItemModel(i + it.id, it.name, it.category, it.price));
         }
       });
-       i=i+100;
+      i = i + 100;
     });
 
     callback(items);
@@ -194,7 +193,7 @@ export const getSharedReceipts = async (
   userId: string,
   fromDate: Date,
   toDate: Date,
-  callback: (receipts: receiptModel[]) => void
+  callback: (receipts: receiptModel[]) => void,
 ) => {
   const fromTimestamp = Timestamp.fromDate(fromDate);
   const toTimestamp = Timestamp.fromDate(toDate);
@@ -212,7 +211,7 @@ export const getSharedReceipts = async (
       collection(firestore, "users", friend.id, "receipts"),
       where("date", ">=", fromTimestamp),
       where("date", "<=", toTimestamp),
-      orderBy("date", "desc")
+      orderBy("date", "desc"),
     );
     console.log("friendId: ", friend.id);
     const unsubscribe = onSnapshot(q, (snapshot) => {

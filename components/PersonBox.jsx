@@ -1,14 +1,14 @@
-
+import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { acceptFriendRequest,rejectFriendRequest } from "@/lib/receiptDb";
-import { auth } from "@/firebase/firebaseConfig";
-export const PersonBox = ({email,requestId,onActionComplete}) => {
-
-
+import { acceptFriendRequest, rejectFriendRequest } from "@/lib/receiptDb";
+// eslint-disable-next-line react/prop-types
+export const PersonBox = ({ email, requestId, onActionComplete }) => {
   return (
-    <View className={`flex-row justify-between items-center ${requestId ? 'bg-secondary' : 'bg-black-100'} rounded-lg p-4 mx-5 mt-5`}>
+    <View
+      className={`flex-row justify-between items-center ${requestId ? "bg-secondary" : "bg-black-100"} rounded-lg p-4 mx-5 mt-5`}
+    >
       <View className="flex-row items-center">
         <MaterialIcons name="person" size={24} color="black" />
         <Text className="text-white text-lg ml-3">{email}</Text>

@@ -1,17 +1,15 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack, usePathname, router, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 
-import { useColorScheme } from "@/components/useColorScheme";
+import { useColorScheme } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -77,11 +75,10 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style="dark" /> 
+      <StatusBar style="dark" />
       {/* will need to be changed if auto dark mode is used */}
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

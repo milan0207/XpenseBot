@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, ScrollView, Image, Alert } from "react-native";
+import { Text, View, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
 import FormField from "../../components/FormField";
@@ -31,11 +31,7 @@ const SignIn = () => {
 
     try {
       const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        form.email,
-        form.password
-      );
+      const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password);
 
       // Handle successful login
       console.log("User logged in:", userCredential.user);
@@ -44,7 +40,7 @@ const SignIn = () => {
       console.error("Login error:", error);
       // Handle specific errors
       let errorMessage = "Login failed. Please try again.";
-      const firebaseError = error as { code?: string }; 
+      const firebaseError = error as { code?: string };
       switch (firebaseError.code) {
         case "auth/invalid-email":
           errorMessage = "Invalid email address";
@@ -67,32 +63,30 @@ const SignIn = () => {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[85vh] px-4 my-6">
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[366px] h-[200px]"
-          />
+          <Image source={images.logo} resizeMode="contain" className="w-[366px] h-[200px]" />
           <Text className="text-2xl text-white text-semibold mt-10 font-psemibold">
             Log into XpenseBot
           </Text>
 
-          {error && (
-            <Text className="text-red-500 mt-4 text-center">{error}</Text>
-          )}
+          {error && <Text className="text-red-500 mt-4 text-center">{error}</Text>}
 
           <FormField
             title="Email"
             value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e })}
+            handleChangeText={(e: string) => setForm({ ...form, email: e })}
             otherStyles="mt-7"
             keyboardType="email-address"
+            placeholder={undefined}
+            error={undefined}
           />
 
           <FormField
             title="Password"
             value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e })}
+            handleChangeText={(e: string) => setForm({ ...form, password: e })}
             otherStyles="mt-7 "
+            placeholder={undefined}
+            error={undefined}
           ></FormField>
 
           <CustomButton
@@ -103,13 +97,8 @@ const SignIn = () => {
           />
 
           <View className="justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Don't have an account?
-            </Text>
-            <Link
-              className="text-lg font-psemibold text-secondary"
-              href="/sign-up"
-            >
+            <Text className="text-lg text-gray-100 font-pregular">Don&apos;t have an account?</Text>
+            <Link className="text-lg font-psemibold text-secondary" href="/sign-up">
               Sign Up
             </Link>
           </View>

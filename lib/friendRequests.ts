@@ -5,24 +5,18 @@ import {
   doc,
   getDoc,
   getDocs,
-  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   where,
   writeBatch,
-    addDoc,
-    Timestamp
+  addDoc,
 } from "firebase/firestore";
 import { firestore, auth } from "@/firebase/firebaseConfig";
 import { functions } from "@/firebase/firebaseConfig";
 import { httpsCallable } from "firebase/functions";
-import receiptModel from "@/models/ReceiptModel";
 
-export const sendFriendRequestByEmail = async (
-  senderId: string,
-  receiverEmail: string
-) => {
+export const sendFriendRequestByEmail = async (senderId: string, receiverEmail: string) => {
   try {
     console.log("senderId: ", senderId);
     const findUser = httpsCallable(functions, "findUserByEmail");
@@ -38,7 +32,7 @@ export const sendFriendRequestByEmail = async (
       requestsRef,
       where("from", "==", senderId),
       where("to", "==", receiver.uid),
-      where("status", "in", ["pending", "accepted"])
+      where("status", "in", ["pending", "accepted"]),
     );
 
     const existingSnapshot = await getDocs(existingQuery);
@@ -59,9 +53,7 @@ export const sendFriendRequestByEmail = async (
     await sendNotification({
       receiverID: receiver.uid, // needs to be tested
       title: "New friend request",
-      body: `${
-        (await auth.currentUser?.email) || "Unknown"
-      } sent you a friend request`,
+      body: `${(await auth.currentUser?.email) || "Unknown"} sent you a friend request`,
     });
     console.log("Friend request sent to:", receiver.uid);
 
@@ -81,7 +73,7 @@ export const getFriendRequests = async (userId: string) => {
     collection(firestore, "friendRequests"),
     where("to", "==", userId),
     where("status", "==", "pending"),
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
   );
 
   const snapshot = await getDocs(q);
@@ -115,7 +107,7 @@ export const acceptFriendRequest = async (requestId: string) => {
         email: toEmail,
       }),
     },
-    { merge: true }
+    { merge: true },
   );
 
   batch.set(
@@ -126,7 +118,7 @@ export const acceptFriendRequest = async (requestId: string) => {
         email: fromEmail,
       }),
     },
-    { merge: true }
+    { merge: true },
   );
 
   // 4. Update request status
@@ -138,7 +130,6 @@ export const acceptFriendRequest = async (requestId: string) => {
 export const rejectFriendRequest = async (requestId: string) => {
   await deleteDoc(doc(firestore, "friendRequests", requestId));
 };
-
 
 export const getFriends = async (userId: string) => {
   const docRef = doc(firestore, "users", userId);
@@ -159,7 +150,7 @@ export const getUnreadNotificationsCount = async (userId: string) => {
   const q = query(
     collection(firestore, "friendRequests"),
     where("to", "==", userId),
-    where("status", "==", "pending")
+    where("status", "==", "pending"),
   );
 
   const snapshot = await getDocs(q);

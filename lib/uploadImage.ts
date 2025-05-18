@@ -1,5 +1,5 @@
-import { storage,auth } from "@/firebase/firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/firebase/firebaseConfig";
+import { ref, uploadBytes } from "firebase/storage";
 
 import uuid from "react-native-uuid";
 
@@ -23,4 +23,3 @@ export const uploadImage = async (localUri: string, userId: string) => {
     throw error;
   }
 };
-
