@@ -2,7 +2,7 @@ import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { acceptFriendRequest, rejectFriendRequest } from "@/lib/receiptDb";
+import { acceptFriendRequest, rejectFriendRequest } from "@/lib/friendRequests";
 // eslint-disable-next-line react/prop-types
 export const PersonBox = ({ email, requestId, onActionComplete }) => {
   return (
@@ -33,6 +33,7 @@ export const PersonBox = ({ email, requestId, onActionComplete }) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={async () => {
+              console.log("Accepting friend request");
               acceptFriendRequest(requestId, email)
                 .then(() => {
                   console.log("Friend request accepted");

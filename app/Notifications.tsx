@@ -1,15 +1,13 @@
+import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
+import { View, Text, SafeAreaView } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import FormField from "@/components/FormField";
 import { auth } from "@/firebase/firebaseConfig";
-import { useEffect,useState } from "react";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useEffect, useState } from "react";
 import CustomButtonWIcon from "@/components/CustomButtonWIcon";
 import { PersonBox } from "@/components/PersonBox";
-import { sendFriendRequestByEmail,getFriendRequests,getFriends } from "@/lib/friendRequests";
-import { set } from "firebase/database";
+import { sendFriendRequestByEmail, getFriendRequests, getFriends } from "@/lib/friendRequests";
 
 type Friend = {
   friendEmail: string;
@@ -20,7 +18,6 @@ type FriendRequest = {
   id: string;
 };
 
-
 export default function Requests() {
   const [email, setEmail] = useState("");
   const [requestIsLoading, setRequestIsLoading] = useState(false);
@@ -29,10 +26,8 @@ export default function Requests() {
 
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
-
-
+  const userId = auth.currentUser?.uid;
   const refreshData = async () => {
-    const userId = auth.currentUser?.uid;
     if (!userId) {
       console.error("User not authenticated.");
       return;
@@ -42,13 +37,13 @@ export default function Requests() {
       setRequestIsLoading(true);
 
       const friendsData = await getFriends(userId);
-      const parsedFriends = friendsData.map((f: any) => ({
+      const parsedFriends = friendsData.map((f: { email?: string }) => ({
         friendEmail: f.email ?? "",
       }));
       setFriends(parsedFriends);
 
       const requestData = await getFriendRequests(userId);
-      const parsedRequests = requestData.map((r: any) => ({
+      const parsedRequests = requestData.map((r: { senderEmail?: string; id?: string }) => ({
         senderEmail: r.senderEmail ?? "",
         id: r.id ?? "",
       }));
@@ -65,38 +60,38 @@ export default function Requests() {
     refreshData();
   }, []);
 
-    const validateEmail = (email: string) => {
-      return /\S+@\S+\.\S+/.test(email);
-    };
+  const validateEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
 
-    const handleSendRequest = async () => {
-      setRequestIsLoading(true);
-      setFormError("");
-      setFeedback("");
+  const handleSendRequest = async () => {
+    setRequestIsLoading(true);
+    setFormError("");
+    setFeedback("");
 
-      try {
-        if (auth.currentUser?.uid) {
-          await sendFriendRequestByEmail(auth.currentUser.uid, email);
-          console.log("Friend request sent to:", email);
-          setFeedback("Friend request sent successfully!!!!");
-        } else {
-          console.error("User ID is undefined. Cannot send friend request.");
-          setFeedback("User not logged in.");
-        }
-      } catch (error) {
-        console.log("Error sending friend request::::", error);
-        setFeedback(
-          "Error: " +
-            (typeof error === "string"
-              ? error
-              : error instanceof Error
-              ? error.message
-              : "An unknown error occurred.")
-        );
-      } finally {
-        setRequestIsLoading(false);
+    try {
+      if (auth.currentUser?.uid) {
+        await sendFriendRequestByEmail(auth.currentUser.uid, email);
+        console.log("Friend request sent to:", email);
+        setFeedback("Friend request sent successfully!!!!");
+      } else {
+        console.error("User ID is undefined. Cannot send friend request.");
+        setFeedback("User not logged in.");
       }
-    };
+    } catch (error) {
+      console.log("Error sending friend request::::", error);
+      setFeedback(
+        "Error: " +
+          (typeof error === "string"
+            ? error
+            : error instanceof Error
+              ? error.message
+              : "An unknown error occurred."),
+      );
+    } finally {
+      setRequestIsLoading(false);
+    }
+  };
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView className="bg-primary h-full">
@@ -113,15 +108,13 @@ export default function Requests() {
               keyboardType="email-address"
             ></FormField>
             <Text className="text-greenAccent text-sm font-semibold mx-7 mt-1">
-                <Text
+              <Text
                 className={`text-sm font-semibold mx-7 mt-1 ${
-                  feedback.startsWith("Error: ")
-                  ? "text-redAccent"
-                  : "text-greenAccent"
+                  feedback.startsWith("Error: ") ? "text-redAccent" : "text-greenAccent"
                 }`}
-                >
+              >
                 {feedback}
-                </Text>
+              </Text>
             </Text>
             <CustomButtonWIcon
               title="Send request"
@@ -160,9 +153,7 @@ export default function Requests() {
             )}
           </View>
           <View>
-            <Text className="text-white text-2xl font-semibold mt-5 mx-5">
-              Friends:
-            </Text>
+            <Text className="text-white text-2xl font-semibold mt-5 mx-5">Friends:</Text>
             {friends.length > 0 ? (
               friends.map((friend) => (
                 <PersonBox

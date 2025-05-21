@@ -155,7 +155,7 @@ export const getItems = (
       const data = doc.data();
       const receiptItems = data.items || [];
 
-      receiptItems.forEach((it: any) => {
+      receiptItems.forEach((it: ItemModel) => {
         if (!category || it.category === category) {
           items.push(new ItemModel(i + it.id, it.name, it.category, it.price));
         }
