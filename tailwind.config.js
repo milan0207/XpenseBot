@@ -10,7 +10,8 @@ module.exports = {
           DEFAULT: "#DAA520",
           100: "#FF9001",
           200: "#FF8E01",
-          lightblack: "#1E1E1E",
+          light: "#DAA000",
+          lightblack: "#262626",
         },
         blackContrast: "#3C3C43",
         txtPrimary: "#E0E0E0",
@@ -21,7 +22,7 @@ module.exports = {
 
         black: {
           DEFAULT: "#000",
-          100: "#1E1E2D",
+          100: "#3c3c43",
           200: "#232533",
         },
         gray: {

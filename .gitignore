@@ -36,4 +36,24 @@ yarn-error.*
 *.tsbuildinfo
 
 #firebase key
-components/firebase/firebaseConfig.js
+firebase/firebaseConfig.js
+
+# documentAi key
+functions/keys/firebase-service-account.json
+
+# firebase project name
+*.firebaserc
+.firebaserc
+.firebaserc
+
+# gemini key
+functions/keys/geminiKey.txt
+
+service-account-google.json
+google-services.json
+
+android/
+/android
+ios/
+
+.easignore
